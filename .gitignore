@@ -1,2 +1,11 @@
 .env
 .ai/plans
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+results/*/
+data/*.sqlite
+data/rag_index/
+dist/
+*.egg-info/

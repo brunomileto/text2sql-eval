@@ -1,0 +1,28 @@
+llm:
+  models:
+    - provider: openai
+      model: gpt-4o
+      temperature: 0.0
+      max_tokens: 1024
+    - provider: anthropic
+      model: claude-3-5-sonnet-20241022
+      temperature: 0.0
+      max_tokens: 1024
+
+rag:
+  backend: chroma
+  top_k: 5
+  embedding_model: text-embedding-3-small
+  index_path: data/rag_index/
+
+dataset:
+  questions: data/dev.json
+  db: data/database.sqlite
+
+experiment:
+  tracks: [a]
+  limit: null
+  output_dir: results/
+
+constraints:
+  restricted_tables_file: config/restricted_tables.yaml
