@@ -41,7 +41,7 @@ def run_experiment_command(
         model=model,
     )
 
-    output_dir = load_config(config_path).experiment.output_dir
+    output_dir = load_config(config_path).run_defaults.output_dir
     artifact_path = Path(output_dir) / run_id / "run.json"
     typer.echo(f"[text2sql-eval] Run ID: {run_id}")
     typer.echo(f"[text2sql-eval] Artifact: {artifact_path}")

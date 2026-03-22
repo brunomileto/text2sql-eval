@@ -36,21 +36,23 @@ def _write_fixture_files(tmp_path):
     config_path.write_text(
         dedent(
             f"""
-            llm:
-              models:
-                - provider: fake
-                  model: local-test
-                  temperature: 0.0
-                  max_tokens: 32
+            models:
+              - provider: fake
+                model: local-test
+                temperature: 0.0
+                max_tokens: 32
 
-            dataset:
-              questions: {questions_path}
-              db: {db_path}
+            inputs:
+              questions_file: {questions_path}
+              database_file: {db_path}
 
-            experiment:
+            run_defaults:
               tracks: [a]
               limit: null
               output_dir: {output_dir}
+
+            rag:
+              backend: chroma
             """
         ).strip()
         + "\n",

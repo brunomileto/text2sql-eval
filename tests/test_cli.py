@@ -5,27 +5,28 @@ from typer.testing import CliRunner
 from text2sql_eval import cli
 from text2sql_eval.config import (
     AppConfig,
-    DatasetConfig,
-    ExperimentConfig,
-    LLMConfig,
+    InputsConfig,
     LLMModelConfig,
+    RunDefaultsConfig,
 )
 
 
 def _base_config() -> AppConfig:
     return AppConfig(
-        llm=LLMConfig(
-            models=[
-                LLMModelConfig(
-                    provider="openai",
-                    model="gpt-4o",
-                    temperature=0.0,
-                    max_tokens=1024,
-                )
-            ]
+        models=[
+            LLMModelConfig(
+                provider="openai",
+                model="gpt-4o",
+                temperature=0.0,
+                max_tokens=1024,
+            )
+        ],
+        inputs=InputsConfig(
+            questions_file="data/dev.json",
+            database_file="data/database.sqlite",
         ),
-        dataset=DatasetConfig(questions="data/dev.json", db="data/database.sqlite"),
-        experiment=ExperimentConfig(tracks=["a"], limit=None, output_dir="results/"),
+        run_defaults=RunDefaultsConfig(tracks=["a"], limit=None, output_dir="results/"),
+        rag={},
     )
 
 
@@ -74,7 +75,9 @@ def test_cli_surfaces_api_errors(monkeypatch):
 
     def fake_run_experiment(**kwargs):
         _ = kwargs
-        raise ValueError("provider and model must be provided together")
+        raise ValueError(
+            "provider and model must be provided together, or provider only"
+        )
 
     monkeypatch.setattr(cli, "run_experiment_api", fake_run_experiment)
 
@@ -82,7 +85,10 @@ def test_cli_surfaces_api_errors(monkeypatch):
 
     assert result.exit_code != 0
     assert isinstance(result.exception, ValueError)
-    assert str(result.exception) == "provider and model must be provided together"
+    assert (
+        str(result.exception)
+        == "provider and model must be provided together, or provider only"
+    )
 
 
 def test_cli_passes_defaults_and_uses_same_config_path_for_artifact_print(monkeypatch):

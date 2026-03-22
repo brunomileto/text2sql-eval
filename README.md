@@ -106,12 +106,20 @@ For local development and tests, prefer the built-in fake provider (no API keys 
 In `config/config.yaml`, set:
 
 ```yaml
-llm:
-  models:
-    - provider: fake
-      model: local-test
-      temperature: 0.0
-      max_tokens: 32
+models:
+  - provider: fake
+    model: local-test
+    temperature: 0.0
+    max_tokens: 32
+
+inputs:
+  questions_file: data/dev.json
+  database_file: data/database.sqlite
+
+run_defaults:
+  tracks: [a]
+  limit: null
+  output_dir: results/
 ```
 
 For real providers (`openai`, `anthropic`), add keys in `.env`:
@@ -159,7 +167,8 @@ Supported overrides:
 
 - `track="a,c"` or `track="all"`
 - `limit=<int>`
-- `provider="...", model="..."` (must be passed together)
+- `provider="..."` to run all configured models for that provider
+- `provider="...", model="..."` to run one exact configured pair
 
 ## Jupyter workflow
 
@@ -205,7 +214,7 @@ for track_name, description in TRACK_DESCRIPTIONS.items():
     print(f"  {track_name}: {description}")
 
 print("\nConfigured models:")
-for model_cfg in cfg.llm.models:
+for model_cfg in cfg.models:
     print(
         f"  provider={model_cfg.provider}, model={model_cfg.model}, "
         f"temperature={model_cfg.temperature}, max_tokens={model_cfg.max_tokens}"

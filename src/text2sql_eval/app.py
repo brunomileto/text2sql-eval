@@ -6,9 +6,6 @@ from typing import Literal, TypeAlias, cast
 from .config import AppConfig, LLMModelConfig, load_config
 from .pipeline.runner import run
 
-DEFAULT_TEMPERATURE = 0.0
-DEFAULT_MAX_TOKENS = 1024
-
 TrackName: TypeAlias = Literal["a", "b", "c"]
 TrackSelector: TypeAlias = TrackName | Literal["all"] | list[TrackName]
 TrackOverride: TypeAlias = TrackSelector | str
@@ -47,21 +44,39 @@ def _parse_tracks(track: TrackOverride, current_tracks: list[str]) -> list[str]:
     return [_normalize_track_name(item) for item in parsed]
 
 
-def _select_model_override(
+def _select_models(
+    current_models: list[LLMModelConfig],
+    provider: str | None,
+    model: str | None,
+) -> list[LLMModelConfig]:
+    if provider is None and model is None:
+        return list(current_models)
+
+    if provider is None or model is None:
+        raise ValueError(
+            "provider and model must be provided together, or provider only"
+        )
+
+    selected = [
+        candidate
+        for candidate in current_models
+        if candidate.provider == provider and candidate.model == model
+    ]
+    if not selected:
+        raise ValueError(f"Unknown provider/model pair: {provider}/{model}")
+    return selected
+
+
+def _select_models_by_provider(
     current_models: list[LLMModelConfig],
     provider: str,
-    model: str,
-) -> LLMModelConfig:
-    for candidate in current_models:
-        if candidate.provider == provider and candidate.model == model:
-            return candidate
-
-    return LLMModelConfig(
-        provider=provider,
-        model=model,
-        temperature=DEFAULT_TEMPERATURE,
-        max_tokens=DEFAULT_MAX_TOKENS,
-    )
+) -> list[LLMModelConfig]:
+    selected = [
+        candidate for candidate in current_models if candidate.provider == provider
+    ]
+    if not selected:
+        raise ValueError(f"Unknown provider: {provider}")
+    return selected
 
 
 def _apply_overrides(
@@ -72,9 +87,9 @@ def _apply_overrides(
     provider: str | None,
     model: str | None,
 ) -> AppConfig:
-    tracks = list(config.experiment.tracks)
-    models = list(config.llm.models)
-    effective_limit = config.experiment.limit if limit is None else limit
+    tracks = list(config.run_defaults.tracks)
+    models = list(config.models)
+    effective_limit = config.run_defaults.limit if limit is None else limit
 
     if track is not None:
         tracks = _parse_tracks(track, tracks)
@@ -82,18 +97,15 @@ def _apply_overrides(
     if effective_limit is not None and effective_limit < 0:
         raise ValueError("limit must be >= 0")
 
-    has_provider = provider is not None
-    has_model = model is not None
-    if has_provider != has_model:
-        raise ValueError("provider and model must be provided together")
-
-    if provider is not None and model is not None:
-        models = [_select_model_override(models, provider=provider, model=model)]
+    if provider is not None and model is None:
+        models = _select_models_by_provider(models, provider=provider)
+    else:
+        models = _select_models(models, provider=provider, model=model)
 
     return replace(
         config,
-        llm=replace(config.llm, models=models),
-        experiment=replace(config.experiment, tracks=tracks, limit=effective_limit),
+        models=models,
+        run_defaults=replace(config.run_defaults, tracks=tracks, limit=effective_limit),
     )
 
 

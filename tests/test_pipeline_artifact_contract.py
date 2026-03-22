@@ -5,10 +5,9 @@ from pathlib import Path
 
 from text2sql_eval.config import (
     AppConfig,
-    DatasetConfig,
-    ExperimentConfig,
-    LLMConfig,
+    InputsConfig,
     LLMModelConfig,
+    RunDefaultsConfig,
 )
 from text2sql_eval.dataset.models import EvalQuestion
 from text2sql_eval.dataset.schema import SchemaContext
@@ -19,22 +18,24 @@ from text2sql_eval.pipeline.runner import run as run_pipeline
 
 def test_pipeline_run_json_contains_analysis_ready_raw_facts(monkeypatch, tmp_path):
     config = AppConfig(
-        llm=LLMConfig(
-            models=[
-                LLMModelConfig(
-                    provider="openai",
-                    model="gpt-4o",
-                    temperature=0.0,
-                    max_tokens=128,
-                )
-            ]
+        models=[
+            LLMModelConfig(
+                provider="openai",
+                model="gpt-4o",
+                temperature=0.0,
+                max_tokens=128,
+            )
+        ],
+        inputs=InputsConfig(
+            questions_file="data/dev.json",
+            database_file="data/database.sqlite",
         ),
-        dataset=DatasetConfig(questions="data/dev.json", db="data/database.sqlite"),
-        experiment=ExperimentConfig(
+        run_defaults=RunDefaultsConfig(
             tracks=["a"],
             limit=2,
             output_dir=str(tmp_path / "results"),
         ),
+        rag={},
     )
 
     questions = [

@@ -16,18 +16,13 @@ class LLMModelConfig:
 
 
 @dataclass
-class LLMConfig:
-    models: list[LLMModelConfig]
+class InputsConfig:
+    questions_file: str
+    database_file: str
 
 
 @dataclass
-class DatasetConfig:
-    questions: str
-    db: str
-
-
-@dataclass
-class ExperimentConfig:
+class RunDefaultsConfig:
     tracks: list[str]
     limit: int | None
     output_dir: str
@@ -35,9 +30,10 @@ class ExperimentConfig:
 
 @dataclass
 class AppConfig:
-    llm: LLMConfig
-    dataset: DatasetConfig
-    experiment: ExperimentConfig
+    models: list[LLMModelConfig]
+    inputs: InputsConfig
+    run_defaults: RunDefaultsConfig
+    rag: dict[str, Any]
 
 
 def _expect_mapping(value: Any, field_name: str) -> dict[str, Any]:
@@ -59,11 +55,7 @@ def _require(mapping: dict[str, Any], key: str, section: str) -> Any:
 
 
 def load_config(path: str = "config/config.yaml") -> AppConfig:
-    """Load config.yaml and return a typed AppConfig.
-
-    API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY) are read directly
-    by the LLM providers from the environment and are not stored here.
-    """
+    """Load config.yaml and return a typed AppConfig."""
 
     config_path = Path(path)
     if not config_path.exists():
@@ -75,46 +67,47 @@ def load_config(path: str = "config/config.yaml") -> AppConfig:
 
     root = _expect_mapping(raw, "root")
 
-    llm_raw = _expect_mapping(_require(root, "llm", "root"), "llm")
-    model_items = _expect_list(_require(llm_raw, "models", "llm"), "llm.models")
+    model_items = _expect_list(_require(root, "models", "root"), "models")
     models: list[LLMModelConfig] = []
     for index, item in enumerate(model_items):
-        model_raw = _expect_mapping(item, f"llm.models[{index}]")
+        model_raw = _expect_mapping(item, f"models[{index}]")
         models.append(
             LLMModelConfig(
-                provider=str(_require(model_raw, "provider", f"llm.models[{index}]")),
-                model=str(_require(model_raw, "model", f"llm.models[{index}]")),
+                provider=str(_require(model_raw, "provider", f"models[{index}]")),
+                model=str(_require(model_raw, "model", f"models[{index}]")),
                 temperature=float(
-                    _require(model_raw, "temperature", f"llm.models[{index}]")
+                    _require(model_raw, "temperature", f"models[{index}]")
                 ),
-                max_tokens=int(
-                    _require(model_raw, "max_tokens", f"llm.models[{index}]")
-                ),
+                max_tokens=int(_require(model_raw, "max_tokens", f"models[{index}]")),
             )
         )
 
-    dataset_raw = _expect_mapping(_require(root, "dataset", "root"), "dataset")
-    dataset = DatasetConfig(
-        questions=str(_require(dataset_raw, "questions", "dataset")),
-        db=str(_require(dataset_raw, "db", "dataset")),
+    inputs_raw = _expect_mapping(_require(root, "inputs", "root"), "inputs")
+    inputs = InputsConfig(
+        questions_file=str(_require(inputs_raw, "questions_file", "inputs")),
+        database_file=str(_require(inputs_raw, "database_file", "inputs")),
     )
 
-    experiment_raw = _expect_mapping(_require(root, "experiment", "root"), "experiment")
+    run_raw = _expect_mapping(_require(root, "run_defaults", "root"), "run_defaults")
     tracks_raw = _expect_list(
-        _require(experiment_raw, "tracks", "experiment"), "experiment.tracks"
+        _require(run_raw, "tracks", "run_defaults"), "run_defaults.tracks"
     )
-    limit_raw = _require(experiment_raw, "limit", "experiment")
+    limit_raw = _require(run_raw, "limit", "run_defaults")
     if limit_raw is not None:
         limit_raw = int(limit_raw)
 
-    experiment = ExperimentConfig(
+    run_defaults = RunDefaultsConfig(
         tracks=[str(track) for track in tracks_raw],
         limit=limit_raw,
-        output_dir=str(_require(experiment_raw, "output_dir", "experiment")),
+        output_dir=str(_require(run_raw, "output_dir", "run_defaults")),
     )
 
+    rag_raw = root.get("rag", {})
+    rag = _expect_mapping(rag_raw, "rag")
+
     return AppConfig(
-        llm=LLMConfig(models=models),
-        dataset=dataset,
-        experiment=experiment,
+        models=models,
+        inputs=inputs,
+        run_defaults=run_defaults,
+        rag=rag,
     )

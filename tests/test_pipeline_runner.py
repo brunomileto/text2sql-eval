@@ -5,10 +5,9 @@ from typing import Any, cast
 
 from text2sql_eval.config import (
     AppConfig,
-    DatasetConfig,
-    ExperimentConfig,
-    LLMConfig,
+    InputsConfig,
     LLMModelConfig,
+    RunDefaultsConfig,
 )
 from text2sql_eval.dataset.models import EvalQuestion
 from text2sql_eval.dataset.schema import SchemaContext
@@ -39,18 +38,20 @@ def test_run_collects_raw_execution_facts_without_evaluator_dependency(monkeypat
     captured: dict[str, Any] = {}
 
     config = AppConfig(
-        llm=LLMConfig(
-            models=[
-                LLMModelConfig(
-                    provider="openai",
-                    model="gpt-4o",
-                    temperature=0.0,
-                    max_tokens=128,
-                )
-            ]
+        models=[
+            LLMModelConfig(
+                provider="openai",
+                model="gpt-4o",
+                temperature=0.0,
+                max_tokens=128,
+            )
+        ],
+        inputs=InputsConfig(
+            questions_file="data/dev.json",
+            database_file="data/database.sqlite",
         ),
-        dataset=DatasetConfig(questions="data/dev.json", db="data/database.sqlite"),
-        experiment=ExperimentConfig(tracks=["a"], limit=1, output_dir="results"),
+        run_defaults=RunDefaultsConfig(tracks=["a"], limit=1, output_dir="results"),
+        rag={},
     )
 
     question = EvalQuestion(

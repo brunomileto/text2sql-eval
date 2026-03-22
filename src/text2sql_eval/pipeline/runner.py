@@ -20,14 +20,14 @@ def run(config: AppConfig) -> str:
     reporter = Reporter(config)
 
     questions = load_questions(
-        Path(config.dataset.questions),
-        Path(config.dataset.db),
-        config.experiment.limit,
+        Path(config.inputs.questions_file),
+        Path(config.inputs.database_file),
+        config.run_defaults.limit,
     )
 
-    tracks = [get_track(name) for name in config.experiment.tracks]
+    tracks = [get_track(name) for name in config.run_defaults.tracks]
     providers = [
-        (model_config, get_provider(model_config)) for model_config in config.llm.models
+        (model_config, get_provider(model_config)) for model_config in config.models
     ]
 
     for question in questions:
@@ -86,5 +86,5 @@ def run(config: AppConfig) -> str:
                     )
                 )
 
-    reporter.flush(run_id=run_id, output_dir=config.experiment.output_dir)
+    reporter.flush(run_id=run_id, output_dir=config.run_defaults.output_dir)
     return run_id

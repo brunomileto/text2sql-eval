@@ -40,13 +40,13 @@ class Reporter:
             schema_version="v1",
             run_id=run_id,
             created_at=datetime.now(UTC).isoformat(timespec="milliseconds"),
-            dataset_path=self._config.dataset.questions,
-            db_path=self._config.dataset.db,
-            limit=self._config.experiment.limit,
-            tracks_requested=list(self._config.experiment.tracks),
+            dataset_path=self._config.inputs.questions_file,
+            db_path=self._config.inputs.database_file,
+            limit=self._config.run_defaults.limit,
+            tracks_requested=list(self._config.run_defaults.tracks),
             models_requested=[
                 RequestedModel(provider=model.provider, model=model.model)
-                for model in self._config.llm.models
+                for model in self._config.models
             ],
             git_commit=self._git_commit(),
             config_snapshot=asdict(self._config),

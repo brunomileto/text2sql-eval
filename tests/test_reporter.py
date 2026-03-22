@@ -4,10 +4,9 @@ import json
 
 from text2sql_eval.config import (
     AppConfig,
-    DatasetConfig,
-    ExperimentConfig,
-    LLMConfig,
+    InputsConfig,
     LLMModelConfig,
+    RunDefaultsConfig,
 )
 from text2sql_eval.results.reporter import Reporter
 from text2sql_eval.results.schema import ExecutionFacts, PipelineRecord
@@ -15,18 +14,20 @@ from text2sql_eval.results.schema import ExecutionFacts, PipelineRecord
 
 def _build_config(output_dir: str) -> AppConfig:
     return AppConfig(
-        llm=LLMConfig(
-            models=[
-                LLMModelConfig(
-                    provider="openai",
-                    model="gpt-4o",
-                    temperature=0.0,
-                    max_tokens=1024,
-                )
-            ]
+        models=[
+            LLMModelConfig(
+                provider="openai",
+                model="gpt-4o",
+                temperature=0.0,
+                max_tokens=1024,
+            )
+        ],
+        inputs=InputsConfig(
+            questions_file="data/dev.json",
+            database_file="data/database.sqlite",
         ),
-        dataset=DatasetConfig(questions="data/dev.json", db="data/database.sqlite"),
-        experiment=ExperimentConfig(tracks=["a"], limit=None, output_dir=output_dir),
+        run_defaults=RunDefaultsConfig(tracks=["a"], limit=None, output_dir=output_dir),
+        rag={},
     )
 
 
@@ -112,7 +113,7 @@ def test_reporter_flush_writes_run_artifact_json(tmp_path):
         {"provider": "openai", "model": "gpt-4o"}
     ]
     assert (
-        payload["run_metadata"]["config_snapshot"]["experiment"]["output_dir"]
+        payload["run_metadata"]["config_snapshot"]["run_defaults"]["output_dir"]
         == output_dir
     )
 
