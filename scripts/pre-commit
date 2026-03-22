@@ -1,0 +1,18 @@
+#!/bin/sh
+# scripts/pre-commit
+# This file is copied to .git/hooks/pre-commit by scripts/install-hooks.sh
+
+echo "Running CI checks in Docker (text2sql-eval)..."
+
+docker compose -f docker-compose.ci.yml run --rm ci
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+  echo ""
+  echo "❌ CI failed. Commit blocked."
+  echo "Fix the issues above and try again."
+  exit 1
+fi
+
+echo "✅ CI passed. Committing."
+exit 0
