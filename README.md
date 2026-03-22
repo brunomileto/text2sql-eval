@@ -129,6 +129,36 @@ OPENAI_API_KEY=...
 ANTHROPIC_API_KEY=...
 ```
 
+Important:
+
+- If you run only `provider: fake`, no API key is required.
+- If you run OpenAI/Anthropic, keys must be present in the process environment.
+- `.env` is not auto-loaded by Python itself. Make sure your shell or notebook sets env vars.
+
+CLI examples:
+
+```bash
+# Option 1: export in current shell
+export OPENAI_API_KEY=...
+export ANTHROPIC_API_KEY=...
+
+# Option 2: source local .env file before running
+set -a
+source .env
+set +a
+```
+
+Notebook example:
+
+```python
+import os
+
+os.environ["OPENAI_API_KEY"] = "..."
+os.environ["ANTHROPIC_API_KEY"] = "..."
+```
+
+If you update env vars after the kernel starts, restart the kernel or re-run the cell that sets `os.environ`.
+
 ### 6) Run tests
 
 ```bash
@@ -263,6 +293,10 @@ Each `records[]` item contains analysis-ready raw evidence:
 - generated/reference execution facts
 - row equality and row hashes
 - latency and timestamps
+
+For a field-by-field explanation with examples, read:
+
+- `docs/run-artifact.md`
 
 ## Common failure modes
 
