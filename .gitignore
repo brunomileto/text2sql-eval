@@ -9,4 +9,5 @@ data/*.sqlite
 data/rag_index/
 dist/
 *.egg-info/
+.ruff_cache/
 # end of file

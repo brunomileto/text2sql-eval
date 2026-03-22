@@ -1,0 +1,17 @@
+[
+  {
+    "question_id": "q001_simple",
+    "question": "How many gold credit cards have been issued?",
+    "sql": "SELECT COUNT(*) FROM card WHERE type = 'gold'"
+  },
+  {
+    "question_id": "q002_medium",
+    "question": "For each region, what is the average monthly payment for loans with status 'A' (contract finished, no problems)?",
+    "sql": "SELECT d.A3 AS region, ROUND(AVG(l.payments), 2) AS avg_monthly_payment FROM loan AS l JOIN account AS a ON a.account_id = l.account_id JOIN district AS d ON d.district_id = a.district_id WHERE l.status = 'A' GROUP BY d.A3 ORDER BY avg_monthly_payment DESC"
+  },
+  {
+    "question_id": "q003_hard",
+    "question": "Which three districts have the highest percentage of running contracts in debt (status 'D') among running contracts (statuses 'C' and 'D')? Return district name and percentage.",
+    "sql": "SELECT d.A2 AS district_name, ROUND(100.0 * SUM(CASE WHEN l.status = 'D' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN l.status IN ('C', 'D') THEN 1 ELSE 0 END), 0), 2) AS debt_share_pct FROM loan AS l JOIN account AS a ON a.account_id = l.account_id JOIN district AS d ON d.district_id = a.district_id WHERE l.status IN ('C', 'D') GROUP BY d.district_id, d.A2 HAVING SUM(CASE WHEN l.status IN ('C', 'D') THEN 1 ELSE 0 END) > 0 ORDER BY debt_share_pct DESC, district_name ASC LIMIT 3"
+  }
+]
