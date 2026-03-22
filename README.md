@@ -298,6 +298,35 @@ For a field-by-field explanation with examples, read:
 
 - `docs/run-artifact.md`
 
+## Prompt management
+
+Prompt templates are external files so prompt iteration does not require Python code changes.
+
+Where prompts live:
+
+- `config/prompts/track_a.txt`
+
+How Track A prompt rendering works:
+
+- track implementation calls the prompt loader with key `track_a`
+- template is loaded from `config/prompts/track_a.txt`
+- template is rendered with Python `str.format(...)`
+- required variable for Track A: `{question}`
+
+Safe editing workflow:
+
+1. Edit `config/prompts/track_a.txt`
+2. Keep required placeholders unchanged (at minimum `{question}`)
+3. Run tests:
+
+```bash
+uv run pytest
+```
+
+For full details and troubleshooting, read:
+
+- `docs/prompts.md`
+
 ## Common failure modes
 
 - `Database file not found`: ensure `data/database.sqlite` exists.
