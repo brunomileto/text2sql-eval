@@ -76,6 +76,17 @@ def test_run_collects_raw_execution_facts_without_evaluator_dependency(monkeypat
         def pre_fetch(self, question: str, vector_store=None) -> list[str]:
             return ["context-a"]
 
+        def build_artifacts(
+            self,
+            question: str,
+            schema_context: SchemaContext,
+            extra_context=None,
+        ) -> dict[str, str]:
+            _ = question
+            _ = schema_context
+            _ = extra_context
+            return {"retrieval_backend": "none"}
+
         def build_prompt(
             self, question: str, schema_context: SchemaContext, extra_context=None
         ) -> str:
@@ -115,6 +126,7 @@ def test_run_collects_raw_execution_facts_without_evaluator_dependency(monkeypat
     assert record.provider == "openai"
     assert record.model == "gpt-4o"
     assert record.extra_context == ["context-a"]
+    assert record.track_artifacts == {"retrieval_backend": "none"}
     assert record.raw_response.startswith("```sql")
     assert record.normalized_sql == "SELECT COUNT(*) FROM employees"
     assert record.generated.success is True

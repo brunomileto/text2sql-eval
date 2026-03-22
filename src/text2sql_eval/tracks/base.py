@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 from ..dataset.schema import SchemaContext
 
@@ -29,3 +30,15 @@ class BaseTrack(ABC):
         _ = question
         _ = vector_store
         return []
+
+    def build_artifacts(
+        self,
+        question: str,
+        schema_context: SchemaContext,
+        extra_context: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Optional structured metadata captured in pipeline output."""
+        _ = question
+        _ = schema_context
+        _ = extra_context
+        return {}

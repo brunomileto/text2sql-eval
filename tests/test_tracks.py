@@ -45,6 +45,17 @@ def test_track_a_pre_fetch_returns_empty():
     assert track.pre_fetch("anything") == []
 
 
+def test_track_a_build_artifacts_returns_empty_mapping():
+    track = TrackA()
+    artifacts = track.build_artifacts(
+        question="anything",
+        schema_context=SchemaContext(),
+        extra_context=[],
+    )
+
+    assert artifacts == {}
+
+
 def test_get_track_returns_track_a_instance_for_a():
     track = get_track("a")
     assert isinstance(track, TrackA)

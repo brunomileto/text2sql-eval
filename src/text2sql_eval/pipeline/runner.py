@@ -41,6 +41,11 @@ def run(config: AppConfig) -> str:
                 prompt = track.build_prompt(
                     question.question, question.schema, extra_context
                 )
+                track_artifacts = track.build_artifacts(
+                    question.question,
+                    question.schema,
+                    extra_context,
+                )
                 llm_response = provider.generate(prompt)
                 sql = extract_sql(llm_response.content)
                 generated_result = execute_sql(sql, question.db_path)
@@ -64,6 +69,7 @@ def run(config: AppConfig) -> str:
                         model=model_config.model,
                         prompt=prompt,
                         extra_context=extra_context,
+                        track_artifacts=track_artifacts,
                         raw_response=llm_response.content,
                         normalized_sql=sql,
                         input_tokens=llm_response.input_tokens,
