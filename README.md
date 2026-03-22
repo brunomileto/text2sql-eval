@@ -62,7 +62,7 @@ uv --version
 From repository root:
 
 ```bash
-uv sync --extra dev
+uv sync
 ```
 
 ### 3) Prepare the active database
