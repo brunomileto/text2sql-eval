@@ -24,6 +24,16 @@ In short: one execution pipeline, many analysis iterations.
 - Primary interface: Python API (`run_experiment`) for notebook workflows.
 - Secondary interface: CLI (`text2sql-eval`) as a thin wrapper over the same API.
 
+## Track definitions
+
+Tracks are contextualization strategies. A track changes prompt/context, not the core execution pipeline.
+
+- `a` - question only (no metadata, no retrieval)
+- `b` - question + schema metadata enrichment
+- `c` - question + metadata + retrieved context (RAG pre-fetch)
+
+Current implementation includes Track A. Track B/C are reserved by contract and are kept in the typed API so notebooks and callers can rely on stable track semantics.
+
 ## Repository map (important paths)
 
 - `config/config.yaml`: default experiment configuration.

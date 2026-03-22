@@ -97,6 +97,23 @@ def test_run_experiment_supports_track_all(monkeypatch):
     assert captured["config"].experiment.tracks == ["a", "b"]
 
 
+def test_run_experiment_supports_typed_track_list_input(monkeypatch):
+    captured: dict[str, AppConfig] = {}
+
+    from text2sql_eval import app
+
+    monkeypatch.setattr(app, "load_config", lambda path: _base_config())
+    monkeypatch.setattr(
+        app,
+        "run",
+        lambda config: captured.setdefault("config", config) and "run-id",
+    )
+
+    run_experiment(track=["a", "c"])
+
+    assert captured["config"].experiment.tracks == ["a", "c"]
+
+
 def test_run_experiment_applies_single_model_override(monkeypatch):
     captured: dict[str, AppConfig] = {}
 
@@ -135,6 +152,11 @@ def test_run_experiment_rejects_negative_limit():
 def test_run_experiment_rejects_empty_track_override():
     with pytest.raises(ValueError, match="track override"):
         run_experiment(track="   ")
+
+
+def test_run_experiment_rejects_unknown_track_name():
+    with pytest.raises(ValueError, match="Unknown track"):
+        run_experiment(track="z")
 
 
 def test_run_experiment_uses_default_sampling_params_for_unknown_model(monkeypatch):

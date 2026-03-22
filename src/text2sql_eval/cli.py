@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import typer
 
-from .app import run_experiment as run_experiment_api
+from .app import TRACK_DESCRIPTIONS, TrackOverride, run_experiment as run_experiment_api
 from .config import load_config
 
 app = typer.Typer()
@@ -17,7 +18,15 @@ def main() -> None:
 
 @app.command("run-experiment")
 def run_experiment_command(
-    track: str | None = typer.Option(None, help="Track(s): a,b,c or all"),
+    track: str | None = typer.Option(
+        None,
+        help=(
+            "Track(s): a,b,c or all. "
+            f"a={TRACK_DESCRIPTIONS['a']} "
+            f"b={TRACK_DESCRIPTIONS['b']} "
+            f"c={TRACK_DESCRIPTIONS['c']}"
+        ),
+    ),
     limit: int | None = typer.Option(None, help="Number of questions"),
     provider: str | None = typer.Option(None, help="Single provider override"),
     model: str | None = typer.Option(None, help="Single model override"),
@@ -26,7 +35,7 @@ def run_experiment_command(
     """Run pipeline and write run.json artifact."""
     run_id = run_experiment_api(
         config_path=config_path,
-        track=track,
+        track=cast(TrackOverride | None, track),
         limit=limit,
         provider=provider,
         model=model,
