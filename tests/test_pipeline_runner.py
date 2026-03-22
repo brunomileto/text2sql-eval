@@ -34,7 +34,7 @@ def test_extract_sql_handles_generic_code_fence():
     assert extract_sql(raw) == "SELECT id FROM users"
 
 
-def test_run_collects_raw_execution_facts_without_evaluator_dependency(monkeypatch):
+def test_run_collects_raw_execution_facts_in_record_payload(monkeypatch):
     captured: dict[str, Any] = {}
 
     config = AppConfig(

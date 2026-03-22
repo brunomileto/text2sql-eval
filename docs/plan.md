@@ -139,8 +139,6 @@ Key modules in active use:
 - `src/text2sql_eval/results/schema.py` (typed artifact contract)
 - `src/text2sql_eval/results/reporter.py` (single-file artifact writer)
 
-The evaluator modules still exist in codebase but are not runtime-critical for notebook-first scoring.
-
 ---
 
 ## 8. Testing Strategy and Current State
