@@ -3,11 +3,13 @@ from __future__ import annotations
 from ..config import LLMModelConfig
 from .anthropic_provider import AnthropicProvider
 from .base import LLMProvider
+from .fake_provider import FakeProvider
 from .openai_provider import OpenAIProvider
 
 LLM_REGISTRY: dict[str, type[LLMProvider]] = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
+    "fake": FakeProvider,
 }
 
 
