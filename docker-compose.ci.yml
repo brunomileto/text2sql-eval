@@ -6,7 +6,8 @@ services:
       dockerfile: Dockerfile.ci
     environment:
       - CI=true
-    command: sh -c "
+    command: >-
+      sh -c "
       echo '=== LINT ===' &&
       uv run ruff check . &&
       uv run ruff format --check . &&
@@ -16,4 +17,4 @@ services:
       uv run bandit -r src/ -q &&
       echo '=== TESTS ===' &&
       uv run pytest --tb=short -q
-    "
+      "
