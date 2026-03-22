@@ -1,0 +1,19 @@
+# docker-compose.ci.yml — local CI pipeline definition
+services:
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    environment:
+      - CI=true
+    command: sh -c "
+      echo '=== LINT ===' &&
+      uv run ruff check . &&
+      uv run ruff format --check . &&
+      echo '=== DEPENDENCY AUDIT ===' &&
+      uv run pip-audit &&
+      echo '=== SECURITY SCAN ===' &&
+      uv run bandit -r src/ -q &&
+      echo '=== TESTS ===' &&
+      uv run pytest --tb=short -q
+    "
