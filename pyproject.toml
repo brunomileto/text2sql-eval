@@ -36,6 +36,7 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+extend-exclude = ["notebooks", "mini-dev"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B", "SIM"]

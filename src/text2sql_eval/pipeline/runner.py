@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ..config import AppConfig
@@ -10,8 +10,8 @@ from ..executor.sql_executor import execute_sql
 from ..llm.registry import get_provider
 from ..results.reporter import Reporter
 from ..results.schema import PipelineRecord
-from .normalization import extract_sql, rows_hash, to_execution_facts
 from ..tracks.registry import get_track
+from .normalization import extract_sql, rows_hash, to_execution_facts
 
 
 def run(config: AppConfig) -> str:
@@ -34,9 +34,7 @@ def run(config: AppConfig) -> str:
         for model_config, provider in providers:
             for track in tracks:
                 pipeline_started = time.perf_counter()
-                started_at = datetime.now(timezone.utc).isoformat(
-                    timespec="milliseconds"
-                )
+                started_at = datetime.now(UTC).isoformat(timespec="milliseconds")
                 extra_context = track.pre_fetch(question.question, vector_store=None)
                 prompt = track.build_prompt(
                     question.question, question.schema, extra_context
@@ -50,9 +48,7 @@ def run(config: AppConfig) -> str:
                 sql = extract_sql(llm_response.content)
                 generated_result = execute_sql(sql, question.db_path)
                 reference_result = execute_sql(question.reference_sql, question.db_path)
-                finished_at = datetime.now(timezone.utc).isoformat(
-                    timespec="milliseconds"
-                )
+                finished_at = datetime.now(UTC).isoformat(timespec="milliseconds")
 
                 rows_equal = None
                 if generated_result.success and reference_result.success:

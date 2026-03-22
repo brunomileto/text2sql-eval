@@ -9,7 +9,8 @@ def _build_test_db(tmp_path):
     db_path = tmp_path / "test.sqlite"
     with sqlite3.connect(db_path) as connection:
         connection.execute(
-            "CREATE TABLE employees (id INTEGER PRIMARY KEY, name TEXT, department TEXT)"
+            "CREATE TABLE employees "
+            "(id INTEGER PRIMARY KEY, name TEXT, department TEXT)"
         )
         connection.executemany(
             "INSERT INTO employees (id, name, department) VALUES (?, ?, ?)",

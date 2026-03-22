@@ -43,14 +43,10 @@ class SchemaContext:
                 fk = "yes" if column.is_foreign_key else "no"
                 references = column.references or ""
                 sections.append(
-                    "| {name} | {data_type} | {pk} | {fk} | {references} | {description} |".format(
-                        name=column.name,
-                        data_type=column.data_type,
-                        pk=pk,
-                        fk=fk,
-                        references=references,
-                        description=column.description,
-                    )
+                    f"| {column.name} | {column.data_type} "
+                    f"| {pk} | {fk} "
+                    f"| {references} "
+                    f"| {column.description} |"
                 )
 
             sections.append("")

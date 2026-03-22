@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +39,7 @@ class Reporter:
         return RunMetadata(
             schema_version="v1",
             run_id=run_id,
-            created_at=datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+            created_at=datetime.now(UTC).isoformat(timespec="milliseconds"),
             dataset_path=self._config.dataset.questions,
             db_path=self._config.dataset.db,
             limit=self._config.experiment.limit,
