@@ -1,62 +1,17 @@
 from __future__ import annotations
 
-import hashlib
-import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 from ..config import AppConfig
 from ..dataset.loader import load_questions
-from ..executor import ExecutionResult
 from ..executor.sql_executor import execute_sql
 from ..llm.registry import get_provider
 from ..results.reporter import Reporter
-from ..results.schema import ExecutionFacts, PipelineRecord
+from ..results.schema import PipelineRecord
+from .normalization import extract_sql, rows_hash, to_execution_facts
 from ..tracks.registry import get_track
-
-
-def extract_sql(raw: str) -> str:
-    """Strip markdown code fences and surrounding whitespace."""
-    text = raw.strip()
-    if not text.startswith("```"):
-        return text
-
-    text = text[3:]
-    if text.lower().startswith("sql"):
-        text = text[3:]
-    text = text.strip()
-    if text.endswith("```"):
-        text = text[:-3]
-    return text.strip()
-
-
-def _normalize_rows(rows: list[tuple[Any, ...]] | None) -> list[list[Any]]:
-    if not rows:
-        return []
-    return [list(row) for row in rows]
-
-
-def _rows_hash(rows: list[tuple[Any, ...]] | None) -> str | None:
-    if rows is None:
-        return None
-    normalized = _normalize_rows(rows)
-    payload = json.dumps(normalized, separators=(",", ":"), ensure_ascii=True)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def _to_execution_facts(
-    result: ExecutionResult, sample_size: int = 50
-) -> ExecutionFacts:
-    normalized_rows = _normalize_rows(result.rows)
-    return ExecutionFacts(
-        success=result.success,
-        error_type_raw=result.error_type,
-        error_message=result.error_message,
-        row_count=len(normalized_rows) if result.success else None,
-        rows_sample=normalized_rows[:sample_size] if result.success else [],
-    )
 
 
 def run(config: AppConfig) -> str:
@@ -114,11 +69,11 @@ def run(config: AppConfig) -> str:
                         input_tokens=llm_response.input_tokens,
                         output_tokens=llm_response.output_tokens,
                         latency_ms=llm_response.latency_ms,
-                        generated=_to_execution_facts(generated_result),
-                        reference=_to_execution_facts(reference_result),
+                        generated=to_execution_facts(generated_result),
+                        reference=to_execution_facts(reference_result),
                         rows_equal=rows_equal,
-                        generated_rows_hash=_rows_hash(generated_result.rows),
-                        reference_rows_hash=_rows_hash(reference_result.rows),
+                        generated_rows_hash=rows_hash(generated_result.rows),
+                        reference_rows_hash=rows_hash(reference_result.rows),
                         pipeline_latency_ms=int(
                             (time.perf_counter() - pipeline_started) * 1000
                         ),
