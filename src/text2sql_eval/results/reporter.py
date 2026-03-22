@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-import csv
 import json
-from collections import defaultdict
+import subprocess
 from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
-
-import yaml
+from typing import Any
 
 from ..config import AppConfig
-from .schema import PipelineRecord
+from .schema import PipelineRecord, RequestedModel, RunArtifact, RunMetadata
 
 
 class Reporter:
@@ -23,102 +21,48 @@ class Reporter:
         self._records.append(record)
 
     @staticmethod
-    def _legacy_outcome(record: PipelineRecord) -> tuple[int, str]:
-        if not record.generated.success:
-            return 0, "SYNTAX_ERROR"
-        if record.rows_equal:
-            return 1, "CORRECT"
-        return 0, "LOGIC_ERROR"
+    def _git_commit() -> str | None:
+        try:
+            completed = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (subprocess.SubprocessError, FileNotFoundError):
+            return None
 
-    @staticmethod
-    def _average(values: Iterable[int]) -> float:
-        items = list(values)
-        if not items:
-            return 0.0
-        return sum(items) / len(items)
+        commit = completed.stdout.strip()
+        return commit or None
+
+    def _build_metadata(self, run_id: str) -> RunMetadata:
+        return RunMetadata(
+            schema_version="v1",
+            run_id=run_id,
+            created_at=datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+            dataset_path=self._config.dataset.questions,
+            db_path=self._config.dataset.db,
+            limit=self._config.experiment.limit,
+            tracks_requested=list(self._config.experiment.tracks),
+            models_requested=[
+                RequestedModel(provider=model.provider, model=model.model)
+                for model in self._config.llm.models
+            ],
+            git_commit=self._git_commit(),
+            config_snapshot=asdict(self._config),
+        )
 
     def flush(self, run_id: str, output_dir: str) -> None:
         run_dir = Path(output_dir) / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
 
-        by_track: dict[str, list[PipelineRecord]] = defaultdict(list)
-        by_group: dict[tuple[str, str, str], list[PipelineRecord]] = defaultdict(list)
+        artifact = RunArtifact(
+            run_metadata=self._build_metadata(run_id),
+            records=list(self._records),
+        )
+        payload: dict[str, Any] = artifact.to_dict()
 
-        for record in self._records:
-            by_track[record.track].append(record)
-            group_key = (record.track, record.model, record.provider)
-            by_group[group_key].append(record)
-
-        for track, records in by_track.items():
-            payload: list[dict[str, Any]] = []
-            for record in records:
-                ex, error_type = self._legacy_outcome(record)
-                row = asdict(record)
-                row["ex"] = ex
-                row["error_type"] = error_type
-                payload.append(row)
-
-            (run_dir / f"{track}.json").write_text(
-                json.dumps(payload, indent=2),
-                encoding="utf-8",
-            )
-
-        summary_path = run_dir / "summary.csv"
-        with summary_path.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.writer(handle)
-            writer.writerow(
-                [
-                    "run_id",
-                    "track",
-                    "model",
-                    "provider",
-                    "total_questions",
-                    "ex_count",
-                    "ex_pct",
-                    "syntax_errors",
-                    "logic_errors",
-                    "correct",
-                    "avg_latency_ms",
-                    "avg_input_tokens",
-                    "avg_output_tokens",
-                ]
-            )
-
-            for (track, model, provider), records in sorted(by_group.items()):
-                total = len(records)
-                outcomes = [self._legacy_outcome(record) for record in records]
-                ex_count = sum(ex for ex, _ in outcomes)
-                syntax_errors = sum(1 for _, err in outcomes if err == "SYNTAX_ERROR")
-                logic_errors = sum(1 for _, err in outcomes if err == "LOGIC_ERROR")
-                correct = sum(1 for _, err in outcomes if err == "CORRECT")
-                avg_latency_ms = self._average(record.latency_ms for record in records)
-                avg_input_tokens = self._average(
-                    record.input_tokens for record in records
-                )
-                avg_output_tokens = self._average(
-                    record.output_tokens for record in records
-                )
-
-                writer.writerow(
-                    [
-                        run_id,
-                        track,
-                        model,
-                        provider,
-                        total,
-                        ex_count,
-                        f"{(ex_count / total) * 100:.1f}",
-                        syntax_errors,
-                        logic_errors,
-                        correct,
-                        f"{avg_latency_ms:.2f}",
-                        f"{avg_input_tokens:.2f}",
-                        f"{avg_output_tokens:.2f}",
-                    ]
-                )
-
-        config_snapshot_path = run_dir / "config_snapshot.yaml"
-        config_snapshot_path.write_text(
-            yaml.safe_dump(asdict(self._config), sort_keys=False),
+        (run_dir / "run.json").write_text(
+            json.dumps(payload, indent=2),
             encoding="utf-8",
         )

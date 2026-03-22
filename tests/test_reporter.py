@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import csv
 import json
-
-import yaml
 
 from text2sql_eval.config import (
     AppConfig,
@@ -33,7 +30,7 @@ def _build_config(output_dir: str) -> AppConfig:
     )
 
 
-def test_reporter_flush_writes_track_summary_and_config_snapshot(tmp_path):
+def test_reporter_flush_writes_run_artifact_json(tmp_path):
     output_dir = str(tmp_path / "results")
     reporter = Reporter(config=_build_config(output_dir))
 
@@ -101,36 +98,28 @@ def test_reporter_flush_writes_track_summary_and_config_snapshot(tmp_path):
     reporter.flush(run_id="20260319-120000", output_dir=output_dir)
 
     run_dir = tmp_path / "results" / "20260319-120000"
-    assert (run_dir / "track_a.json").exists()
-    assert (run_dir / "summary.csv").exists()
-    assert (run_dir / "config_snapshot.yaml").exists()
+    run_json = run_dir / "run.json"
+    assert run_json.exists()
 
-    track_records = json.loads((run_dir / "track_a.json").read_text(encoding="utf-8"))
-    assert len(track_records) == 2
-    assert track_records[0]["track"] == "track_a"
-    assert track_records[0]["provider"] == "openai"
-    assert track_records[0]["model"] == "gpt-4o"
-    assert "generated" in track_records[0]
-    assert "reference" in track_records[0]
+    payload = json.loads(run_json.read_text(encoding="utf-8"))
 
-    with (run_dir / "summary.csv").open("r", encoding="utf-8", newline="") as handle:
-        rows = list(csv.DictReader(handle))
-
-    assert len(rows) == 1
-    row = rows[0]
-    assert row["run_id"] == "20260319-120000"
-    assert row["track"] == "track_a"
-    assert row["model"] == "gpt-4o"
-    assert row["provider"] == "openai"
-    assert row["total_questions"] == "2"
-    assert row["ex_count"] == "1"
-    assert row["ex_pct"] == "50.0"
-    assert row["syntax_errors"] == "1"
-    assert row["logic_errors"] == "0"
-    assert row["correct"] == "1"
-
-    snapshot = yaml.safe_load(
-        (run_dir / "config_snapshot.yaml").read_text(encoding="utf-8")
+    assert payload["run_metadata"]["schema_version"] == "v1"
+    assert payload["run_metadata"]["run_id"] == "20260319-120000"
+    assert payload["run_metadata"]["dataset_path"] == "data/dev.json"
+    assert payload["run_metadata"]["db_path"] == "data/database.sqlite"
+    assert payload["run_metadata"]["tracks_requested"] == ["a"]
+    assert payload["run_metadata"]["models_requested"] == [
+        {"provider": "openai", "model": "gpt-4o"}
+    ]
+    assert (
+        payload["run_metadata"]["config_snapshot"]["experiment"]["output_dir"]
+        == output_dir
     )
-    assert snapshot["experiment"]["output_dir"] == output_dir
-    assert snapshot["llm"]["models"][0]["provider"] == "openai"
+
+    records = payload["records"]
+    assert len(records) == 2
+    assert records[0]["track"] == "track_a"
+    assert records[0]["provider"] == "openai"
+    assert records[0]["model"] == "gpt-4o"
+    assert "generated" in records[0]
+    assert "reference" in records[0]
