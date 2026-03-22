@@ -192,6 +192,38 @@ print("Run ID:", run_id)
 print("Records:", len(payload["records"]))
 ```
 
+Notebook cell example (inspect configured providers/models before running):
+
+```python
+from text2sql_eval.app import TRACK_DESCRIPTIONS
+from text2sql_eval.config import load_config
+
+cfg = load_config("config/config.yaml")
+
+print("Available tracks:")
+for track_name, description in TRACK_DESCRIPTIONS.items():
+    print(f"  {track_name}: {description}")
+
+print("\nConfigured models:")
+for model_cfg in cfg.llm.models:
+    print(
+        f"  provider={model_cfg.provider}, model={model_cfg.model}, "
+        f"temperature={model_cfg.temperature}, max_tokens={model_cfg.max_tokens}"
+    )
+```
+
+Then run using one of those provider/model pairs:
+
+```python
+run_id = run_experiment(
+    config_path="config/config.yaml",
+    track="a",
+    provider="openai",
+    model="gpt-4o",
+    limit=10,
+)
+```
+
 Minimal load example:
 
 ```python
