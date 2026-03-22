@@ -5,66 +5,61 @@ import json
 from collections import defaultdict
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import yaml
 
-from ..config import AppConfig, LLMModelConfig
-from ..dataset.models import EvalQuestion
-from ..evaluator.execution_accuracy import EXScore
-from ..llm.base import LLMResponse
+from ..config import AppConfig
+from .schema import PipelineRecord
 
 
 class Reporter:
     def __init__(self, config: AppConfig):
         self._config = config
-        self._records: list[dict[str, Any]] = []
+        self._records: list[PipelineRecord] = []
 
-    def record(
-        self,
-        question: EvalQuestion,
-        model_config: LLMModelConfig,
-        track: str,
-        prompt: str,
-        generated_sql: str,
-        llm_response: LLMResponse,
-        score: EXScore,
-    ) -> None:
+    def record(self, record: PipelineRecord) -> None:
         """Append one result record to the in-memory buffer."""
-        self._records.append(
-            {
-                "question_id": question.question_id,
-                "db_id": question.db_path.stem,
-                "question": question.question,
-                "track": track,
-                "model": model_config.model,
-                "provider": model_config.provider,
-                "prompt": prompt,
-                "generated_sql": generated_sql,
-                "reference_sql": question.reference_sql,
-                "ex": score.ex,
-                "error_type": score.error_type,
-                "latency_ms": llm_response.latency_ms,
-                "input_tokens": llm_response.input_tokens,
-                "output_tokens": llm_response.output_tokens,
-            }
-        )
+        self._records.append(record)
+
+    @staticmethod
+    def _legacy_outcome(record: PipelineRecord) -> tuple[int, str]:
+        if not record.generated.success:
+            return 0, "SYNTAX_ERROR"
+        if record.rows_equal:
+            return 1, "CORRECT"
+        return 0, "LOGIC_ERROR"
+
+    @staticmethod
+    def _average(values: Iterable[int]) -> float:
+        items = list(values)
+        if not items:
+            return 0.0
+        return sum(items) / len(items)
 
     def flush(self, run_id: str, output_dir: str) -> None:
         run_dir = Path(output_dir) / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
 
-        by_track: dict[str, list[dict[str, Any]]] = defaultdict(list)
-        by_group: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
+        by_track: dict[str, list[PipelineRecord]] = defaultdict(list)
+        by_group: dict[tuple[str, str, str], list[PipelineRecord]] = defaultdict(list)
 
         for record in self._records:
-            by_track[record["track"]].append(record)
-            group_key = (record["track"], record["model"], record["provider"])
+            by_track[record.track].append(record)
+            group_key = (record.track, record.model, record.provider)
             by_group[group_key].append(record)
 
         for track, records in by_track.items():
+            payload: list[dict[str, Any]] = []
+            for record in records:
+                ex, error_type = self._legacy_outcome(record)
+                row = asdict(record)
+                row["ex"] = ex
+                row["error_type"] = error_type
+                payload.append(row)
+
             (run_dir / f"{track}.json").write_text(
-                json.dumps(records, indent=2),
+                json.dumps(payload, indent=2),
                 encoding="utf-8",
             )
 
@@ -91,22 +86,17 @@ class Reporter:
 
             for (track, model, provider), records in sorted(by_group.items()):
                 total = len(records)
-                ex_count = sum(int(record["ex"]) for record in records)
-                syntax_errors = sum(
-                    1 for record in records if record["error_type"] == "SYNTAX_ERROR"
+                outcomes = [self._legacy_outcome(record) for record in records]
+                ex_count = sum(ex for ex, _ in outcomes)
+                syntax_errors = sum(1 for _, err in outcomes if err == "SYNTAX_ERROR")
+                logic_errors = sum(1 for _, err in outcomes if err == "LOGIC_ERROR")
+                correct = sum(1 for _, err in outcomes if err == "CORRECT")
+                avg_latency_ms = self._average(record.latency_ms for record in records)
+                avg_input_tokens = self._average(
+                    record.input_tokens for record in records
                 )
-                logic_errors = sum(
-                    1 for record in records if record["error_type"] == "LOGIC_ERROR"
-                )
-                correct = sum(
-                    1 for record in records if record["error_type"] == "CORRECT"
-                )
-                avg_latency_ms = sum(record["latency_ms"] for record in records) / total
-                avg_input_tokens = (
-                    sum(record["input_tokens"] for record in records) / total
-                )
-                avg_output_tokens = (
-                    sum(record["output_tokens"] for record in records) / total
+                avg_output_tokens = self._average(
+                    record.output_tokens for record in records
                 )
 
                 writer.writerow(

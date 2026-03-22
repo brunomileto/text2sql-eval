@@ -12,11 +12,8 @@ from text2sql_eval.config import (
     LLMConfig,
     LLMModelConfig,
 )
-from text2sql_eval.dataset.models import EvalQuestion
-from text2sql_eval.dataset.schema import SchemaContext
-from text2sql_eval.evaluator.execution_accuracy import EXScore
-from text2sql_eval.llm.base import LLMResponse
 from text2sql_eval.results.reporter import Reporter
+from text2sql_eval.results.schema import ExecutionFacts, PipelineRecord
 
 
 def _build_config(output_dir: str) -> AppConfig:
@@ -40,47 +37,65 @@ def test_reporter_flush_writes_track_summary_and_config_snapshot(tmp_path):
     output_dir = str(tmp_path / "results")
     reporter = Reporter(config=_build_config(output_dir))
 
-    question = EvalQuestion(
-        question_id="q001",
-        question="How many employees are there?",
-        reference_sql="SELECT COUNT(*) FROM employees",
-        schema=SchemaContext(),
-        db_path=tmp_path / "company.sqlite",
-    )
-    model_config = LLMModelConfig(
-        provider="openai",
-        model="gpt-4o",
-        temperature=0.0,
-        max_tokens=1024,
-    )
-
     reporter.record(
-        question=question,
-        model_config=model_config,
-        track="track_a",
-        prompt="prompt-1",
-        generated_sql="SELECT COUNT(*) FROM employees",
-        llm_response=LLMResponse(
-            content="SELECT COUNT(*) FROM employees",
+        PipelineRecord(
+            question_id="q001",
+            question="How many employees are there?",
+            track="track_a",
+            provider="openai",
+            model="gpt-4o",
+            prompt="prompt-1",
+            raw_response="SELECT COUNT(*) FROM employees",
+            normalized_sql="SELECT COUNT(*) FROM employees",
             input_tokens=100,
             output_tokens=20,
             latency_ms=400,
+            generated=ExecutionFacts(
+                success=True,
+                error_type_raw=None,
+                error_message=None,
+                row_count=1,
+                rows_sample=[[1]],
+            ),
+            reference=ExecutionFacts(
+                success=True,
+                error_type_raw=None,
+                error_message=None,
+                row_count=1,
+                rows_sample=[[1]],
+            ),
+            rows_equal=True,
         ),
-        score=EXScore(ex=1, error_type="CORRECT"),
     )
     reporter.record(
-        question=question,
-        model_config=model_config,
-        track="track_a",
-        prompt="prompt-2",
-        generated_sql="SELEC COUNT(*) FROM employees",
-        llm_response=LLMResponse(
-            content="SELEC COUNT(*) FROM employees",
+        PipelineRecord(
+            question_id="q001",
+            question="How many employees are there?",
+            track="track_a",
+            provider="openai",
+            model="gpt-4o",
+            prompt="prompt-2",
+            raw_response="SELEC COUNT(*) FROM employees",
+            normalized_sql="SELEC COUNT(*) FROM employees",
             input_tokens=120,
             output_tokens=10,
             latency_ms=600,
+            generated=ExecutionFacts(
+                success=False,
+                error_type_raw="SYNTAX_ERROR",
+                error_message="syntax error",
+                row_count=None,
+                rows_sample=[],
+            ),
+            reference=ExecutionFacts(
+                success=True,
+                error_type_raw=None,
+                error_message=None,
+                row_count=1,
+                rows_sample=[[1]],
+            ),
+            rows_equal=False,
         ),
-        score=EXScore(ex=0, error_type="SYNTAX_ERROR"),
     )
 
     reporter.flush(run_id="20260319-120000", output_dir=output_dir)
@@ -95,6 +110,8 @@ def test_reporter_flush_writes_track_summary_and_config_snapshot(tmp_path):
     assert track_records[0]["track"] == "track_a"
     assert track_records[0]["provider"] == "openai"
     assert track_records[0]["model"] == "gpt-4o"
+    assert "generated" in track_records[0]
+    assert "reference" in track_records[0]
 
     with (run_dir / "summary.csv").open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
