@@ -83,3 +83,32 @@ def test_cli_surfaces_api_errors(monkeypatch):
     assert result.exit_code != 0
     assert isinstance(result.exception, ValueError)
     assert str(result.exception) == "provider and model must be provided together"
+
+
+def test_cli_passes_defaults_and_uses_same_config_path_for_artifact_print(monkeypatch):
+    runner = CliRunner()
+    captured: dict[str, object] = {}
+
+    def fake_run_experiment(**kwargs):
+        captured["kwargs"] = kwargs
+        return "20260322-131500"
+
+    def fake_load_config(path: str) -> AppConfig:
+        captured["config_path"] = path
+        return _base_config()
+
+    monkeypatch.setattr(cli, "run_experiment_api", fake_run_experiment)
+    monkeypatch.setattr(cli, "load_config", fake_load_config)
+
+    result = runner.invoke(cli.app, ["run-experiment"])
+
+    assert result.exit_code == 0
+    assert captured["kwargs"] == {
+        "config_path": "config/config.yaml",
+        "track": None,
+        "limit": None,
+        "provider": None,
+        "model": None,
+    }
+    assert captured["config_path"] == "config/config.yaml"
+    assert "Artifact: results/20260322-131500/run.json" in result.stdout

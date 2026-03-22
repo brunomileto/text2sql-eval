@@ -130,3 +130,30 @@ def test_run_experiment_requires_provider_and_model_together():
 def test_run_experiment_rejects_negative_limit():
     with pytest.raises(ValueError, match="limit must be >= 0"):
         run_experiment(limit=-1)
+
+
+def test_run_experiment_rejects_empty_track_override():
+    with pytest.raises(ValueError, match="track override"):
+        run_experiment(track="   ")
+
+
+def test_run_experiment_uses_default_sampling_params_for_unknown_model(monkeypatch):
+    captured: dict[str, AppConfig] = {}
+
+    from text2sql_eval import app
+
+    monkeypatch.setattr(app, "load_config", lambda path: _base_config())
+    monkeypatch.setattr(
+        app,
+        "run",
+        lambda config: captured.setdefault("config", config) and "run-id",
+    )
+
+    run_experiment(provider="openai", model="gpt-4.2-mini")
+
+    models = captured["config"].llm.models
+    assert len(models) == 1
+    assert models[0].provider == "openai"
+    assert models[0].model == "gpt-4.2-mini"
+    assert models[0].temperature == 0.0
+    assert models[0].max_tokens == 1024
