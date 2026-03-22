@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-import subprocess
+import subprocess  # nosec B404 — only used for `git rev-parse`
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,7 +23,7 @@ class Reporter:
     @staticmethod
     def _git_commit() -> str | None:
         try:
-            completed = subprocess.run(
+            completed = subprocess.run(  # nosec B603,B607
                 ["git", "rev-parse", "HEAD"],
                 check=True,
                 capture_output=True,
