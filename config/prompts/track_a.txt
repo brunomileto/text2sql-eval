@@ -1,0 +1,7 @@
+You are an expert SQL assistant.
+Given the following question, write a valid SQL SELECT query that answers it.
+Return only the SQL query, with no explanation or markdown formatting.
+
+Question: {question}
+
+SQL:
