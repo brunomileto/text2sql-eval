@@ -1,16 +1,8 @@
 from __future__ import annotations
 
 from ..dataset.schema import SchemaContext
+from ..prompts.loader import render_prompt
 from .base import BaseTrack
-
-TRACK_A_PROMPT = """\
-You are an expert SQL assistant.
-Given the following question, write a valid SQL SELECT query that answers it.
-Return only the SQL query, with no explanation or markdown formatting.
-
-Question: {question}
-
-SQL:"""
 
 
 class TrackA(BaseTrack):
@@ -26,4 +18,4 @@ class TrackA(BaseTrack):
     ) -> str:
         _ = schema_context
         _ = extra_context
-        return TRACK_A_PROMPT.format(question=question)
+        return render_prompt("track_a", {"question": question})
