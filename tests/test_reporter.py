@@ -8,6 +8,7 @@ from text2sql_eval.config import (
     LLMModelConfig,
     RunDefaultsConfig,
 )
+from text2sql_eval.dataset.schema import SchemaContext
 from text2sql_eval.results.reporter import Reporter
 from text2sql_eval.results.schema import ExecutionFacts, PipelineRecord
 
@@ -34,6 +35,7 @@ def _build_config(output_dir: str) -> AppConfig:
 def test_reporter_flush_writes_run_artifact_json(tmp_path):
     output_dir = str(tmp_path / "results")
     reporter = Reporter(config=_build_config(output_dir))
+    reporter.set_schema_context(SchemaContext())
 
     reporter.record(
         PipelineRecord(
@@ -100,9 +102,12 @@ def test_reporter_flush_writes_run_artifact_json(tmp_path):
 
     run_dir = tmp_path / "results" / "20260319-120000"
     run_json = run_dir / "run.json"
+    schema_json = run_dir / "schema_context.json"
     assert run_json.exists()
+    assert schema_json.exists()
 
     payload = json.loads(run_json.read_text(encoding="utf-8"))
+    schema_payload = json.loads(schema_json.read_text(encoding="utf-8"))
 
     assert payload["run_metadata"]["schema_version"] == "v1"
     assert payload["run_metadata"]["run_id"] == "20260319-120000"
@@ -112,10 +117,12 @@ def test_reporter_flush_writes_run_artifact_json(tmp_path):
     assert payload["run_metadata"]["models_requested"] == [
         {"provider": "openai", "model": "gpt-4o"}
     ]
+    assert payload["run_metadata"]["schema_artifact_path"] == "schema_context.json"
     assert (
         payload["run_metadata"]["config_snapshot"]["run_defaults"]["output_dir"]
         == output_dir
     )
+    assert schema_payload == {"tables": []}
 
     records = payload["records"]
     assert len(records) == 2
@@ -124,3 +131,44 @@ def test_reporter_flush_writes_run_artifact_json(tmp_path):
     assert records[0]["model"] == "gpt-4o"
     assert "generated" in records[0]
     assert "reference" in records[0]
+
+
+def test_reporter_flush_omits_schema_artifact_when_schema_not_set(tmp_path):
+    output_dir = str(tmp_path / "results")
+    reporter = Reporter(config=_build_config(output_dir))
+
+    reporter.record(
+        PipelineRecord(
+            question_id="q001",
+            question="How many employees are there?",
+            track="track_a",
+            provider="openai",
+            model="gpt-4o",
+            prompt="prompt-1",
+            raw_response="SELECT COUNT(*) FROM employees",
+            normalized_sql="SELECT COUNT(*) FROM employees",
+            generated=ExecutionFacts(
+                success=True,
+                error_type_raw=None,
+                error_message=None,
+                row_count=1,
+                rows_sample=[[1]],
+            ),
+            reference=ExecutionFacts(
+                success=True,
+                error_type_raw=None,
+                error_message=None,
+                row_count=1,
+                rows_sample=[[1]],
+            ),
+            rows_equal=True,
+        )
+    )
+
+    reporter.flush(run_id="20260319-120001", output_dir=output_dir)
+
+    run_dir = tmp_path / "results" / "20260319-120001"
+    payload = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+
+    assert payload["run_metadata"]["schema_artifact_path"] is None
+    assert not (run_dir / "schema_context.json").exists()

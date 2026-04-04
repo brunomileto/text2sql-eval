@@ -68,10 +68,13 @@ def test_api_runs_end_to_end_with_local_fake_provider(tmp_path):
     run_id = run_experiment(config_path=str(config_path))
 
     run_json = output_dir / run_id / "run.json"
+    schema_json = output_dir / run_id / "schema_context.json"
     assert run_json.exists()
+    assert not schema_json.exists()
 
     payload = json.loads(run_json.read_text(encoding="utf-8"))
     assert payload["run_metadata"]["schema_version"] == "v1"
+    assert payload["run_metadata"]["schema_artifact_path"] is None
     assert payload["run_metadata"]["models_requested"] == [
         {"provider": "fake", "model": "local-test"}
     ]
@@ -104,3 +107,35 @@ def test_cli_runs_end_to_end_with_same_local_fixture(tmp_path):
 
     run_json = output_dir / run_id / "run.json"
     assert run_json.exists()
+    assert not (output_dir / run_id / "schema_context.json").exists()
+
+
+def test_api_runs_mixed_track_a_and_b_with_one_schema_artifact(tmp_path):
+    config_path, output_dir = _write_fixture_files(tmp_path)
+    config_text = config_path.read_text(encoding="utf-8").replace(
+        "tracks: [a]",
+        "tracks: [a, b]",
+    )
+    config_path.write_text(config_text, encoding="utf-8")
+
+    run_id = run_experiment(config_path=str(config_path))
+
+    run_dir = output_dir / run_id
+    payload = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+    schema_json = run_dir / "schema_context.json"
+
+    assert payload["run_metadata"]["schema_artifact_path"] == "schema_context.json"
+    assert schema_json.exists()
+    assert len(payload["records"]) == 2
+
+    record_a = next(
+        record for record in payload["records"] if record["track"] == "track_a"
+    )
+    record_b = next(
+        record for record in payload["records"] if record["track"] == "track_b"
+    )
+
+    assert "Schema:" not in record_a["prompt"]
+    assert "Question: Return a constant one." in record_a["prompt"]
+    assert "Schema:" in record_b["prompt"]
+    assert "## Table: demo" in record_b["prompt"]

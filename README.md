@@ -32,7 +32,7 @@ Tracks are contextualization strategies. A track changes prompt/context, not the
 - `b` - question + schema metadata enrichment
 - `c` - question + metadata + retrieved context (RAG pre-fetch)
 
-Current implementation includes Track A. Track B/C are reserved by contract and are kept in the typed API so notebooks and callers can rely on stable track semantics.
+Current implementation includes Track A and Track B. Track C remains reserved by contract so notebooks and callers can rely on stable track semantics.
 
 ## Repository map (important paths)
 
@@ -291,7 +291,7 @@ Top-level keys:
 - `run_metadata`
 - `records`
 
-`run_metadata` contains run config and provenance (`schema_version`, `config_snapshot`, requested tracks/models, timestamps, etc.).
+`run_metadata` contains run config and provenance (`schema_version`, `config_snapshot`, requested tracks/models, timestamps, etc.). It also includes `schema_artifact_path`, which points to `schema_context.json` in the same run folder.
 
 Each `records[]` item contains analysis-ready raw evidence:
 
@@ -300,6 +300,10 @@ Each `records[]` item contains analysis-ready raw evidence:
 - generated/reference execution facts
 - row equality and row hashes
 - latency and timestamps
+
+Each run folder also contains:
+
+- `schema_context.json`: structured schema introspected from the active SQLite database for that run
 
 For a field-by-field explanation with examples, read:
 
@@ -312,18 +316,21 @@ Prompt templates are external files so prompt iteration does not require Python 
 Where prompts live:
 
 - `config/prompts/track_a.txt`
+- `config/prompts/track_b.txt`
 
-How Track A prompt rendering works:
+How prompt rendering works:
 
 - track implementation calls the prompt loader with key `track_a`
 - template is loaded from `config/prompts/track_a.txt`
 - template is rendered with Python `str.format(...)`
 - required variable for Track A: `{question}`
+- Track B uses key `track_b` and requires `{question}` plus `{schema}`
 
 Safe editing workflow:
 
 1. Edit `config/prompts/track_a.txt`
-2. Keep required placeholders unchanged (at minimum `{question}`)
+2. Keep required placeholders unchanged
+3. For Track B, keep both `{question}` and `{schema}`
 3. Run tests:
 
 ```bash

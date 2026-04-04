@@ -23,6 +23,7 @@ class RunMetadata:
     models_requested: list[RequestedModel]
     git_commit: str | None
     config_snapshot: dict[str, Any]
+    schema_artifact_path: str | None = None
 
 
 @dataclass

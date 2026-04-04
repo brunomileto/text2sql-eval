@@ -12,6 +12,14 @@ def test_load_prompt_template_reads_track_a_file():
     assert "Question: {question}" in template
 
 
+def test_load_prompt_template_reads_track_b_file():
+    template = load_prompt_template("track_b")
+
+    assert "Schema:" in template
+    assert "{schema}" in template
+    assert "Question: {question}" in template
+
+
 def test_load_prompt_template_raises_for_missing_file():
     with pytest.raises(FileNotFoundError, match="Prompt template not found"):
         load_prompt_template("track_missing")
@@ -22,6 +30,21 @@ def test_render_prompt_fills_question_placeholder():
 
     assert "How many accounts exist?" in prompt
     assert "{question}" not in prompt
+
+
+def test_render_prompt_fills_track_b_placeholders():
+    prompt = render_prompt(
+        "track_b",
+        {
+            "question": "How many accounts exist?",
+            "schema": "## Table: accounts",
+        },
+    )
+
+    assert "How many accounts exist?" in prompt
+    assert "## Table: accounts" in prompt
+    assert "{question}" not in prompt
+    assert "{schema}" not in prompt
 
 
 def test_render_prompt_raises_for_missing_template_variables():

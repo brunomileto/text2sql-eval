@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import EvalQuestion
-from .schema import parse_schema
+from .schema import SchemaContext, parse_schema
 
 
 def _require(record: dict[str, Any], key: str, index: int) -> Any:
@@ -18,6 +18,7 @@ def load_questions(
     questions_path: Path,
     db_path: Path,
     limit: int | None = None,
+    schema_context: SchemaContext | None = None,
 ) -> list[EvalQuestion]:
     """
     Read the questions JSON and return EvalQuestion objects.
@@ -38,7 +39,7 @@ def load_questions(
     if limit is not None and limit < 0:
         raise ValueError("limit must be >= 0")
 
-    schema = parse_schema(db_path)
+    schema = schema_context if schema_context is not None else parse_schema(db_path)
     records = json.loads(questions_path.read_text(encoding="utf-8"))
     if not isinstance(records, list):
         raise ValueError("Questions file must contain a JSON list")

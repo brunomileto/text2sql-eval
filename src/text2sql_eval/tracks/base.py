@@ -12,6 +12,11 @@ class BaseTrack(ABC):
     def name(self) -> str:
         """Short identifier used in output files and logs."""
 
+    @property
+    def uses_schema_context(self) -> bool:
+        """Whether this track requires run-scoped schema metadata."""
+        return False
+
     @abstractmethod
     def build_prompt(
         self,

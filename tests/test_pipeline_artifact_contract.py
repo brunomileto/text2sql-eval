@@ -10,7 +10,7 @@ from text2sql_eval.config import (
     RunDefaultsConfig,
 )
 from text2sql_eval.dataset.models import EvalQuestion
-from text2sql_eval.dataset.schema import SchemaContext
+from text2sql_eval.dataset.schema import Column, SchemaContext, Table
 from text2sql_eval.executor.sql_executor import ExecutionResult
 from text2sql_eval.llm.base import LLMResponse
 from text2sql_eval.pipeline.runner import run as run_pipeline
@@ -43,14 +43,32 @@ def test_pipeline_run_json_contains_analysis_ready_raw_facts(monkeypatch, tmp_pa
             question_id="q001",
             question="How many employees?",
             reference_sql="SELECT COUNT(*) FROM employees",
-            schema=SchemaContext(),
+            schema=SchemaContext(
+                tables=[
+                    Table(
+                        name="employees",
+                        columns=[
+                            Column(name="id", data_type="INTEGER", is_primary_key=True)
+                        ],
+                    )
+                ]
+            ),
             db_path=Path("/tmp/fake.sqlite"),
         ),
         EvalQuestion(
             question_id="q002",
             question="List all employees",
             reference_sql="SELECT name FROM employees",
-            schema=SchemaContext(),
+            schema=SchemaContext(
+                tables=[
+                    Table(
+                        name="employees",
+                        columns=[
+                            Column(name="id", data_type="INTEGER", is_primary_key=True)
+                        ],
+                    )
+                ]
+            ),
             db_path=Path("/tmp/fake.sqlite"),
         ),
     ]
@@ -126,6 +144,7 @@ def test_pipeline_run_json_contains_analysis_ready_raw_facts(monkeypatch, tmp_pa
 
     run_id = run_pipeline(config)
     run_json = tmp_path / "results" / run_id / "run.json"
+    schema_json = tmp_path / "results" / run_id / "schema_context.json"
     payload = json.loads(run_json.read_text(encoding="utf-8"))
 
     metadata = payload["run_metadata"]
@@ -135,7 +154,9 @@ def test_pipeline_run_json_contains_analysis_ready_raw_facts(monkeypatch, tmp_pa
     assert metadata["db_path"] == "data/database.sqlite"
     assert metadata["tracks_requested"] == ["a"]
     assert metadata["models_requested"] == [{"provider": "openai", "model": "gpt-4o"}]
+    assert metadata["schema_artifact_path"] is None
     assert "config_snapshot" in metadata
+    assert not schema_json.exists()
 
     records = payload["records"]
     assert len(records) == 2

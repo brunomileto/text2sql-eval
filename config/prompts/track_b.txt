@@ -1,0 +1,11 @@
+You are an expert SQL assistant.
+Given the following schema and question, write a valid SQL SELECT query that answers it.
+Use only tables and columns present in the schema.
+Return only the SQL query, with no explanation or markdown formatting.
+
+Schema:
+{schema}
+
+Question: {question}
+
+SQL:

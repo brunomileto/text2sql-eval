@@ -34,12 +34,18 @@ Key fields:
 - `models_requested`: provider/model list requested for this run
 - `git_commit`: current repository commit hash (best effort)
 - `config_snapshot`: full resolved config serialized into the artifact
+- `schema_artifact_path`: run-relative path to the saved schema JSON artifact
 
 Why this matters:
 
 - You can always reconstruct run conditions from a single file.
 - Notebook analysis can group/compare runs safely.
 - Reproducibility does not depend on local memory or shell history.
+
+Each run folder may also include sibling artifacts referenced by `run_metadata`.
+Current additional artifact:
+
+- `schema_context.json`: structured schema introspected from the active SQLite database used for the run
 
 ## `records`
 

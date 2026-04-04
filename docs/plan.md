@@ -112,7 +112,7 @@ Current hooks:
 
 `build_artifacts` is now the official extension seam for track-specific metadata in `run.json`.
 
-Current enabled track set is Track A (`a`).
+Current enabled track set is Track A (`a`) and Track B (`b`).
 
 ---
 
@@ -166,7 +166,7 @@ Current status: full suite passing.
 
 Still intentionally deferred:
 
-- Track B/C prompt strategies and RAG execution path
+- Track C prompt strategy and RAG execution path
 - notebook artifacts and analysis notebooks in-repo
 - optional `records.jsonl` scalability split (manifest + jsonl)
 - docker packaging and operational hardening

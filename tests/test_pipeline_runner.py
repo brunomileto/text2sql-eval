@@ -73,6 +73,7 @@ def test_run_collects_raw_execution_facts_in_record_payload(monkeypatch):
 
     class FakeTrack:
         name = "track_a"
+        uses_schema_context = False
 
         def pre_fetch(self, question: str, vector_store=None) -> list[str]:
             return ["context-a"]
@@ -96,6 +97,9 @@ def test_run_collects_raw_execution_facts_in_record_payload(monkeypatch):
     class FakeReporter:
         def __init__(self, config: AppConfig):
             _ = config
+
+        def set_schema_context(self, schema_context: SchemaContext) -> None:
+            captured["schema_context"] = schema_context
 
         def record(self, record) -> None:
             captured["record"] = record

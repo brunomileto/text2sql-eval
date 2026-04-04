@@ -94,3 +94,51 @@ def test_pipeline_uses_external_track_a_prompt_template(tmp_path, monkeypatch):
 
     assert "CUSTOM TEMPLATE ACTIVE" in record["prompt"]
     assert "Question payload: Return a constant one." in record["prompt"]
+
+
+def test_pipeline_uses_external_track_b_prompt_template(tmp_path, monkeypatch):
+    config_path, output_dir = _write_fixture_files(tmp_path)
+    config_text = config_path.read_text(encoding="utf-8").replace(
+        "tracks: [a]",
+        "tracks: [b]",
+    )
+    config_path.write_text(config_text, encoding="utf-8")
+
+    prompts_dir = tmp_path / "prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    (prompts_dir / "track_b.txt").write_text(
+        dedent(
+            """
+            CUSTOM TRACK B TEMPLATE
+            Schema payload:
+            {schema}
+            Question payload: {question}
+            SQL:
+            """
+        ).strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    from text2sql_eval.prompts import loader
+
+    monkeypatch.setattr(loader, "_PROMPTS_DIR", prompts_dir)
+    loader.load_prompt_template.cache_clear()
+
+    try:
+        run_id = run_experiment(
+            config_path=str(config_path), provider="fake", model="local-test"
+        )
+    finally:
+        loader.load_prompt_template.cache_clear()
+
+    run_json = output_dir / run_id / "run.json"
+    payload = json.loads(run_json.read_text(encoding="utf-8"))
+    record = payload["records"][0]
+    schema_json = output_dir / run_id / "schema_context.json"
+
+    assert "CUSTOM TRACK B TEMPLATE" in record["prompt"]
+    assert "Question payload: Return a constant one." in record["prompt"]
+    assert "## Table: demo" in record["prompt"]
+    assert payload["run_metadata"]["schema_artifact_path"] == "schema_context.json"
+    assert schema_json.exists()

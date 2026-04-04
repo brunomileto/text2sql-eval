@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ..config import AppConfig
 from ..dataset.loader import load_questions
+from ..dataset.schema import SchemaContext, parse_schema
 from ..executor.sql_executor import execute_sql
 from ..llm.registry import get_provider
 from ..results.reporter import Reporter
@@ -18,14 +19,24 @@ def run(config: AppConfig) -> str:
     """Run experiment for all configured tracks and models and return run_id."""
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     reporter = Reporter(config)
+    tracks = [get_track(name) for name in config.run_defaults.tracks]
+    needs_schema_context = any(
+        getattr(track, "uses_schema_context", False) for track in tracks
+    )
+    shared_schema = (
+        parse_schema(Path(config.inputs.database_file))
+        if needs_schema_context
+        else SchemaContext()
+    )
 
     questions = load_questions(
         Path(config.inputs.questions_file),
         Path(config.inputs.database_file),
         config.run_defaults.limit,
+        schema_context=shared_schema,
     )
-
-    tracks = [get_track(name) for name in config.run_defaults.tracks]
+    if needs_schema_context:
+        reporter.set_schema_context(shared_schema)
     providers = [
         (model_config, get_provider(model_config)) for model_config in config.models
     ]
