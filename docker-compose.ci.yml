@@ -8,13 +8,5 @@ services:
       - CI=true
     command: >-
       sh -c "
-      echo '=== LINT ===' &&
-      uv run ruff check . &&
-      uv run ruff format --check . &&
-      echo '=== DEPENDENCY AUDIT ===' &&
-      uv run pip-audit &&
-      echo '=== SECURITY SCAN ===' &&
-      uv run bandit -r src/ -q &&
-      echo '=== TESTS ===' &&
-      uv run pytest --tb=short -q
+      make check
       "

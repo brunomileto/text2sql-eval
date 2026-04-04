@@ -5,7 +5,8 @@ from typing import cast
 
 import typer
 
-from .app import TRACK_DESCRIPTIONS, TrackOverride, run_experiment as run_experiment_api
+from .app import TRACK_DESCRIPTIONS, TrackOverride
+from .app import run_experiment as run_experiment_api
 from .config import load_config
 
 app = typer.Typer()

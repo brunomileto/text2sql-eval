@@ -159,11 +159,18 @@ os.environ["ANTHROPIC_API_KEY"] = "..."
 
 If you update env vars after the kernel starts, restart the kernel or re-run the cell that sets `os.environ`.
 
-### 6) Run tests
+### 6) Run local checks
 
 ```bash
-uv run pytest
+make check
 ```
+
+This runs the same local validation sequence used by the git pre-commit hook:
+
+- `ruff check`
+- `ruff format --check`
+- `bandit -r src/ -q`
+- `pytest --tb=short -q`
 
 ## Run experiments
 
@@ -339,3 +346,9 @@ For full details and troubleshooting, read:
 - Keep runtime policy-light; do not add notebook scoring logic into pipeline.
 - Keep CLI thin; add behavior in API layer (`app.py`) first.
 - Treat `run.json` schema as a contract; evolve with explicit versioning.
+
+
+
+----
+
+Objective: analisar se vale a pena fazer o investimento em relação ao nível de acurácia. Mudar hipótese. Mas o que é custo-benefício? latência, tokens/dinheiro, complexidade da query pra analise (checar mini-dev para definição)

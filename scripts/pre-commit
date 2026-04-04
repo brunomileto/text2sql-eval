@@ -2,9 +2,9 @@
 # scripts/pre-commit
 # This file is copied to .git/hooks/pre-commit by scripts/install-hooks.sh
 
-echo "Running CI checks in Docker (text2sql-eval)..."
+echo "Running local CI checks (text2sql-eval)..."
 
-docker compose -f docker-compose.ci.yml run --rm ci
+make check
 STATUS=$?
 
 if [ $STATUS -ne 0 ]; then
