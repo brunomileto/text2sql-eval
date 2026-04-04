@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from text2sql_eval.app import run_experiment
+from text2sql_eval.app import build_rag_index, run_experiment
 from text2sql_eval.config import (
     AppConfig,
     InputsConfig,
@@ -193,3 +193,22 @@ def test_run_experiment_rejects_empty_track_override():
 def test_run_experiment_rejects_unknown_track_name():
     with pytest.raises(ValueError, match="Unknown track"):
         run_experiment(track="z")
+
+
+def test_build_rag_index_loads_config_and_delegates(monkeypatch):
+    calls: dict[str, object] = {}
+
+    from text2sql_eval import app
+
+    monkeypatch.setattr(app, "load_config", lambda path: _base_config())
+
+    def fake_build_rag_index(config: AppConfig):
+        calls["config"] = config
+        return "result"
+
+    monkeypatch.setattr(app, "build_rag_index_impl", fake_build_rag_index)
+
+    result = build_rag_index(config_path="config/custom.yaml")
+
+    assert result == "result"
+    assert isinstance(calls["config"], AppConfig)

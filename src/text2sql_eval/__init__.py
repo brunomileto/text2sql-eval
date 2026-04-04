@@ -3,6 +3,7 @@ from .app import (
     TrackName,
     TrackOverride,
     TrackSelector,
+    build_rag_index,
     run_experiment,
 )
 
@@ -11,5 +12,6 @@ __all__ = [
     "TrackName",
     "TrackOverride",
     "TrackSelector",
+    "build_rag_index",
     "run_experiment",
 ]

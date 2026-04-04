@@ -5,6 +5,8 @@ from typing import Literal, TypeAlias, cast
 
 from .config import AppConfig, LLMModelConfig, load_config
 from .pipeline.runner import run
+from .rag import RagIndexBuildResult
+from .rag.builder import build_rag_index as build_rag_index_impl
 
 TrackName: TypeAlias = Literal["a", "b", "c"]
 TrackSelector: TypeAlias = TrackName | Literal["all"] | list[TrackName]
@@ -140,3 +142,9 @@ def run_experiment(
         model=model,
     )
     return run(config)
+
+
+def build_rag_index(config_path: str = "config/config.yaml") -> RagIndexBuildResult:
+    """Build the configured RAG index and return a summary."""
+    config = load_config(config_path)
+    return build_rag_index_impl(config)

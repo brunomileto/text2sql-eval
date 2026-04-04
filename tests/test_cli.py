@@ -118,3 +118,26 @@ def test_cli_passes_defaults_and_uses_same_config_path_for_artifact_print(monkey
     }
     assert captured["config_path"] == "config/config.yaml"
     assert "Artifact: results/20260322-131500/run.json" in result.stdout
+
+
+def test_cli_build_rag_index_delegates_to_app(monkeypatch):
+    runner = CliRunner()
+
+    class Result:
+        index_path = "data/rag_index"
+        manifest_path = "data/rag_index/manifest.json"
+        source_count = 3
+        chunk_count = 12
+
+    monkeypatch.setattr(cli, "build_rag_index_api", lambda config_path: Result())
+
+    result = runner.invoke(
+        cli.app,
+        ["build-rag-index", "--config-path", "config/custom.yaml"],
+    )
+
+    assert result.exit_code == 0
+    assert "RAG Index: data/rag_index" in result.stdout
+    assert "Manifest: data/rag_index/manifest.json" in result.stdout
+    assert "Source Files: 3" in result.stdout
+    assert "Chunks: 12" in result.stdout
