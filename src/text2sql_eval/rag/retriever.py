@@ -18,6 +18,11 @@ class RagRetriever:
         return self._vector_store.retrieve(question, top_k=self._top_k)
 
 
+def rag_manifest_path(config: AppConfig) -> str:
+    rag_config = parse_rag_config(config.rag)
+    return str(Path(rag_config.index_path) / "manifest.json")
+
+
 def build_retriever(config: AppConfig) -> RagRetriever:
     rag_config = parse_rag_config(config.rag)
     index_path = Path(rag_config.index_path)

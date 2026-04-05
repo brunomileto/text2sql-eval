@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ..dataset.schema import SchemaContext
+from ..rag.models import RetrievedChunk
 
 
 class BaseTrack(ABC):
@@ -15,6 +16,11 @@ class BaseTrack(ABC):
     @property
     def uses_schema_context(self) -> bool:
         """Whether this track requires run-scoped schema metadata."""
+        return False
+
+    @property
+    def uses_retrieval_context(self) -> bool:
+        """Whether this track requires run-scoped retrieval context."""
         return False
 
     @abstractmethod
@@ -29,11 +35,11 @@ class BaseTrack(ABC):
     def pre_fetch(
         self,
         question: str,
-        vector_store=None,
+        retrieved_chunks: list[RetrievedChunk] | None = None,
     ) -> list[str]:
         """Optional RAG pre-step. Default is no retrieval."""
         _ = question
-        _ = vector_store
+        _ = retrieved_chunks
         return []
 
     def build_artifacts(
@@ -46,4 +52,11 @@ class BaseTrack(ABC):
         _ = question
         _ = schema_context
         _ = extra_context
+        return {}
+
+    def build_retrieval_artifacts(
+        self,
+        retrieved_chunks: list[RetrievedChunk] | None = None,
+    ) -> dict[str, Any]:
+        _ = retrieved_chunks
         return {}

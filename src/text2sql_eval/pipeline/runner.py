@@ -9,6 +9,8 @@ from ..dataset.loader import load_questions
 from ..dataset.schema import SchemaContext, parse_schema
 from ..executor.sql_executor import execute_sql
 from ..llm.registry import get_provider
+from ..rag import build_retriever, rag_manifest_path
+from ..rag.models import RetrievedChunk
 from ..results.reporter import Reporter
 from ..results.schema import PipelineRecord
 from ..tracks.registry import get_track
@@ -23,11 +25,15 @@ def run(config: AppConfig) -> str:
     needs_schema_context = any(
         getattr(track, "uses_schema_context", False) for track in tracks
     )
+    needs_retrieval_context = any(
+        getattr(track, "uses_retrieval_context", False) for track in tracks
+    )
     shared_schema = (
         parse_schema(Path(config.inputs.database_file))
         if needs_schema_context
         else SchemaContext()
     )
+    retriever = build_retriever(config) if needs_retrieval_context else None
 
     questions = load_questions(
         Path(config.inputs.questions_file),
@@ -37,16 +43,27 @@ def run(config: AppConfig) -> str:
     )
     if needs_schema_context:
         reporter.set_schema_context(shared_schema)
+    if needs_retrieval_context:
+        reporter.set_rag_manifest_path(rag_manifest_path(config))
     providers = [
         (model_config, get_provider(model_config)) for model_config in config.models
     ]
+    retrieval_cache: dict[str, list[RetrievedChunk]] = {}
 
     for question in questions:
+        retrieved_chunks = (
+            retrieval_cache.setdefault(
+                question.question,
+                retriever.retrieve(question.question),
+            )
+            if retriever is not None
+            else []
+        )
         for model_config, provider in providers:
             for track in tracks:
                 pipeline_started = time.perf_counter()
                 started_at = datetime.now(UTC).isoformat(timespec="milliseconds")
-                extra_context = track.pre_fetch(question.question, vector_store=None)
+                extra_context = track.pre_fetch(question.question, retrieved_chunks)
                 prompt = track.build_prompt(
                     question.question, question.schema, extra_context
                 )
@@ -55,6 +72,10 @@ def run(config: AppConfig) -> str:
                     question.schema,
                     extra_context,
                 )
+                if hasattr(track, "build_retrieval_artifacts"):
+                    track_artifacts |= track.build_retrieval_artifacts(
+                        retrieved_chunks=retrieved_chunks
+                    )
                 llm_response = provider.generate(prompt)
                 sql = extract_sql(llm_response.content)
                 generated_result = execute_sql(sql, question.db_path)

@@ -30,6 +30,7 @@ def test_run_artifact_to_dict_contains_expected_contract_fields():
             git_commit="abc123",
             config_snapshot={"experiment": {"output_dir": "results/"}},
             schema_artifact_path="schema_context.json",
+            rag_manifest_path="data/rag_index/manifest.json",
         ),
         records=[
             PipelineRecord(
@@ -74,6 +75,9 @@ def test_run_artifact_to_dict_contains_expected_contract_fields():
     assert payload["run_metadata"]["schema_version"] == "v1"
     assert payload["run_metadata"]["tracks_requested"] == ["a", "b"]
     assert payload["run_metadata"]["schema_artifact_path"] == "schema_context.json"
+    assert (
+        payload["run_metadata"]["rag_manifest_path"] == "data/rag_index/manifest.json"
+    )
     assert payload["records"][0]["track"] == "track_a"
     assert payload["records"][0]["generated"]["row_count"] == 1
     assert payload["records"][0]["rows_equal"] is True
@@ -93,6 +97,7 @@ def test_run_artifact_to_json_is_valid_and_roundtrips():
             git_commit=None,
             config_snapshot={},
             schema_artifact_path=None,
+            rag_manifest_path=None,
         ),
         records=[],
     )

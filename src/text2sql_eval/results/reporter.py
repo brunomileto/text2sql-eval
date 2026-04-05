@@ -17,6 +17,7 @@ class Reporter:
         self._config = config
         self._records: list[PipelineRecord] = []
         self._schema_context: SchemaContext | None = None
+        self._rag_manifest_path: str | None = None
 
     def record(self, record: PipelineRecord) -> None:
         """Append one result record to the in-memory buffer."""
@@ -24,6 +25,9 @@ class Reporter:
 
     def set_schema_context(self, schema_context: SchemaContext) -> None:
         self._schema_context = schema_context
+
+    def set_rag_manifest_path(self, rag_manifest_path: str) -> None:
+        self._rag_manifest_path = rag_manifest_path
 
     @staticmethod
     def _git_commit() -> str | None:
@@ -45,6 +49,7 @@ class Reporter:
         run_id: str,
         *,
         schema_artifact_path: str | None = None,
+        rag_manifest_path: str | None = None,
     ) -> RunMetadata:
         return RunMetadata(
             schema_version="v1",
@@ -61,6 +66,7 @@ class Reporter:
             git_commit=self._git_commit(),
             config_snapshot=asdict(self._config),
             schema_artifact_path=schema_artifact_path,
+            rag_manifest_path=rag_manifest_path,
         )
 
     def flush(self, run_id: str, output_dir: str) -> None:
@@ -71,7 +77,11 @@ class Reporter:
         if self._schema_context is not None:
             schema_artifact_path = "schema_context.json"
             (run_dir / schema_artifact_path).write_text(
-                json.dumps(asdict(self._schema_context), indent=2),
+                json.dumps(
+                    asdict(self._schema_context),
+                    indent=2,
+                    ensure_ascii=False,
+                ),
                 encoding="utf-8",
             )
 
@@ -79,12 +89,13 @@ class Reporter:
             run_metadata=self._build_metadata(
                 run_id,
                 schema_artifact_path=schema_artifact_path,
+                rag_manifest_path=self._rag_manifest_path,
             ),
             records=list(self._records),
         )
         payload: dict[str, Any] = artifact.to_dict()
 
         (run_dir / "run.json").write_text(
-            json.dumps(payload, indent=2),
+            json.dumps(payload, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )

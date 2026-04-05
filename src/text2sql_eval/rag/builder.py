@@ -42,7 +42,10 @@ def build_rag_index(
             for document in documents
         ],
     }
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
     return RagIndexBuildResult(
         index_path=str(index_path),

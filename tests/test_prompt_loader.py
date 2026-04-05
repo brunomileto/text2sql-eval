@@ -20,6 +20,15 @@ def test_load_prompt_template_reads_track_b_file():
     assert "Question: {question}" in template
 
 
+def test_load_prompt_template_reads_track_c_file():
+    template = load_prompt_template("track_c")
+
+    assert "Retrieved Context:" in template
+    assert "{schema}" in template
+    assert "{retrieved_context}" in template
+    assert "Question: {question}" in template
+
+
 def test_load_prompt_template_raises_for_missing_file():
     with pytest.raises(FileNotFoundError, match="Prompt template not found"):
         load_prompt_template("track_missing")
@@ -45,6 +54,24 @@ def test_render_prompt_fills_track_b_placeholders():
     assert "## Table: accounts" in prompt
     assert "{question}" not in prompt
     assert "{schema}" not in prompt
+
+
+def test_render_prompt_fills_track_c_placeholders():
+    prompt = render_prompt(
+        "track_c",
+        {
+            "question": "How many accounts exist?",
+            "schema": "## Table: accounts",
+            "retrieved_context": "Accounts include active and archived rows.",
+        },
+    )
+
+    assert "How many accounts exist?" in prompt
+    assert "## Table: accounts" in prompt
+    assert "Accounts include active and archived rows." in prompt
+    assert "{question}" not in prompt
+    assert "{schema}" not in prompt
+    assert "{retrieved_context}" not in prompt
 
 
 def test_render_prompt_raises_for_missing_template_variables():

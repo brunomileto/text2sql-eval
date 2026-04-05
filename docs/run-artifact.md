@@ -35,6 +35,7 @@ Key fields:
 - `git_commit`: current repository commit hash (best effort)
 - `config_snapshot`: full resolved config serialized into the artifact
 - `schema_artifact_path`: run-relative path to the saved schema JSON artifact
+- `rag_manifest_path`: path to the RAG index manifest used for retrieval-enabled tracks
 
 Why this matters:
 
@@ -70,6 +71,8 @@ In other words, one record is one full model attempt + SQL execution pair.
 - `prompt`: final prompt sent to the model
 - `extra_context`: pre-fetched context returned by track hook (if any)
 - `track_artifacts`: optional structured metadata produced by the track
+
+For Track C, `track_artifacts` includes full retrieved chunk payloads so notebook analysis can inspect the exact retrieved context used by the run.
 
 ### LLM output fields
 

@@ -8,8 +8,10 @@ Contract for v1:
 - template variables use Python `str.format(...)` placeholders
 - Track A requires `{question}`
 - Track B requires `{question}` and `{schema}`
+- Track C requires `{question}`, `{schema}`, and `{retrieved_context}`
 
 Initial template files:
 
 - `track_a.txt`
 - `track_b.txt`
+- `track_c.txt`

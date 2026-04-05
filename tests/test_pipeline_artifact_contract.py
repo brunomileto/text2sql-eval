@@ -155,6 +155,7 @@ def test_pipeline_run_json_contains_analysis_ready_raw_facts(monkeypatch, tmp_pa
     assert metadata["tracks_requested"] == ["a"]
     assert metadata["models_requested"] == [{"provider": "openai", "model": "gpt-4o"}]
     assert metadata["schema_artifact_path"] is None
+    assert metadata["rag_manifest_path"] is None
     assert "config_snapshot" in metadata
     assert not schema_json.exists()
 

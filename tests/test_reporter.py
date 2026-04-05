@@ -118,6 +118,7 @@ def test_reporter_flush_writes_run_artifact_json(tmp_path):
         {"provider": "openai", "model": "gpt-4o"}
     ]
     assert payload["run_metadata"]["schema_artifact_path"] == "schema_context.json"
+    assert payload["run_metadata"]["rag_manifest_path"] is None
     assert (
         payload["run_metadata"]["config_snapshot"]["run_defaults"]["output_dir"]
         == output_dir
@@ -171,4 +172,5 @@ def test_reporter_flush_omits_schema_artifact_when_schema_not_set(tmp_path):
     payload = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
 
     assert payload["run_metadata"]["schema_artifact_path"] is None
+    assert payload["run_metadata"]["rag_manifest_path"] is None
     assert not (run_dir / "schema_context.json").exists()

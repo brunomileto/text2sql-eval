@@ -32,7 +32,7 @@ Tracks are contextualization strategies. A track changes prompt/context, not the
 - `b` - question + schema metadata enrichment
 - `c` - question + metadata + retrieved context (RAG pre-fetch)
 
-Current implementation includes Track A and Track B. Track C remains reserved by contract so notebooks and callers can rely on stable track semantics.
+Current implementation includes Track A, Track B, and Track C.
 
 ## Repository map (important paths)
 
@@ -133,6 +133,7 @@ Important:
 
 - If you run only `provider: fake`, no API key is required.
 - If you run OpenAI/Anthropic, keys must be present in the process environment.
+- If you build or use the RAG index for Track C, `OPENAI_API_KEY` must be present.
 - `.env` is not auto-loaded by Python itself. Make sure your shell or notebook sets env vars.
 
 CLI examples:
@@ -185,6 +186,18 @@ Single-model override:
 ```bash
 uv run text2sql-eval run-experiment --provider openai --model gpt-4o
 ```
+
+### Build the RAG index for Track C
+
+Curated retrieval source files live under `docs/rag/`.
+
+Build the reusable index with:
+
+```bash
+uv run text2sql-eval build-rag-index --config-path config/config.yaml
+```
+
+Track C will fail fast if the configured index does not exist.
 
 ### Python API (recommended for notebooks)
 
@@ -301,9 +314,11 @@ Each `records[]` item contains analysis-ready raw evidence:
 - row equality and row hashes
 - latency and timestamps
 
-Each run folder also contains:
+Each run folder may also contain:
 
 - `schema_context.json`: structured schema introspected from the active SQLite database for that run
+
+`run_metadata` may also include `rag_manifest_path`, which points to the manifest for the prebuilt RAG index used by Track C.
 
 For a field-by-field explanation with examples, read:
 
@@ -317,6 +332,7 @@ Where prompts live:
 
 - `config/prompts/track_a.txt`
 - `config/prompts/track_b.txt`
+- `config/prompts/track_c.txt`
 
 How prompt rendering works:
 
@@ -325,6 +341,7 @@ How prompt rendering works:
 - template is rendered with Python `str.format(...)`
 - required variable for Track A: `{question}`
 - Track B uses key `track_b` and requires `{question}` plus `{schema}`
+- Track C uses key `track_c` and requires `{question}`, `{schema}`, and `{retrieved_context}`
 
 Safe editing workflow:
 

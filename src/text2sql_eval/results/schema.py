@@ -24,6 +24,7 @@ class RunMetadata:
     git_commit: str | None
     config_snapshot: dict[str, Any]
     schema_artifact_path: str | None = None
+    rag_manifest_path: str | None = None
 
 
 @dataclass
@@ -82,4 +83,4 @@ class RunArtifact:
         return asdict(self)
 
     def to_json(self, *, indent: int = 2) -> str:
-        return json.dumps(self.to_dict(), indent=indent)
+        return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
