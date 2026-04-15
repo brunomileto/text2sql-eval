@@ -1,0 +1,5 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+id_de_disp.,id de disposição,número único de identificação desta linha de registro,inteiro,
+id_do_cliente,,número identificador do cliente,inteiro,
+id_da_conta,,número identificador da conta,inteiro,
+tipo,,tipo de disposição,texto,"PROPRIETARIO": proprietário da conta; "DISTRIBUIDOR": disponente da conta; evidência de senso comum: a conta só pode ter o direito de emitir ordens permanentes ou solicitar empréstimos

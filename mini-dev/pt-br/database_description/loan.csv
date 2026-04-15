@@ -1,0 +1,8 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+id_do_emprestimo,,número identificador dos dados do empréstimo,inteiro,
+id_da_conta,,número identificador da conta,inteiro,
+data,,data de aprovação do empréstimo,data,
+quantia,,valor aprovado,inteiro,unidade：dólar americano
+duracao,,duração do empréstimo,inteiro,unidade：mês
+pagamentos,pagamentos mensais,pagamentos mensais,real,unidade：mês
+status,,status do reembolso,texto,"A" significa contrato concluído sem problemas; "B" significa contrato concluído com empréstimo não pago; "C" significa contrato em andamento ok até agora; "D" significa contrato em andamento com cliente em dívida

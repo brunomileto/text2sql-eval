@@ -1,0 +1,7 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+id_do_pedido,,identificando o pedido único,inteiro,
+id_da_conta,,número identificador da conta,inteiro,
+banco_para,banco do destinatário,banco do destinatário,texto,
+conta_para,conta do destinatário,conta do destinatário,inteiro,cada banco tem um código único de duas letras
+quantia,quantia debitada,quantia debitada,real,
+simbolo_k,caracterização do pagamento,finalidade do pagamento,texto,"POJISTNE" significa pagamento de seguro; "SIPO" significa pagamento doméstico; "LEASING" significa locação; "UVER" significa pagamento de empréstimo

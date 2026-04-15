@@ -1,0 +1,5 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+identificacao_do_cartao,id do cartão de crédito,número identificador do cartão de crédito,inteiro,
+id_de_disp.,id de disposição,id de disposição,inteiro,
+tipo,tipo,tipo do cartão de crédito,texto,"junior": classe júnior de cartão de crédito; "classic": classe padrão de cartão de crédito; "gold": cartão de crédito de alto nível
+publicado,emitido,data de emissão do cartão de crédito,data,no formato AAMMDD

@@ -1,0 +1,11 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+identificacao_trans,id da transação,id da transação,inteiro,
+id_da_conta,,,inteiro,
+data,data da transação,data da transação,data,
+tipo,+/- transação,+/- transação,texto,"RECEPCAO" significa crédito; "EMITIR" significa saque
+operacao,modo de transação,modo de transação,texto,"ESCOLHER CARTOU": saque no cartão de crédito; "DEPOSITO": crédito em dinheiro; "TRANSFERENCIA DA CONTA": cobrança de outro banco; "ESCOLHER": saque em dinheiro; "TRANSFERENCIA PARA CONTA": remessa para outro banco
+quantia,valor do dinheiro,valor do dinheiro,inteiro,Unidade：USD
+equilibrio,saldo após transação,saldo após transação,inteiro,Unidade：USD
+simbolo_k,caracterização da transação,,texto,"POJISTNE": significa pagamento de seguro; "SLUZBY": significa pagamento por extrato; "UROK": significa juros creditados; "SANKC. UROK": juros de sanção se saldo negativo; "SIPO": significa pagamento doméstico; "DUCHOD": significa aposentadoria por velhice; "UVER": significa pagamento de empréstimo
+banco,banco do parceiro,,texto,cada banco tem um código único de duas letras
+conta,conta do parceiro,,inteiro,

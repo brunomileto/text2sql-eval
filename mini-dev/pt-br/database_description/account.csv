@@ -1,0 +1,5 @@
+nome_coluna_original,nome_coluna,descricao_coluna,formato_dado,descricao_valor
+id_da_conta,id da conta,id da conta,inteiro,
+id_do_distrito,localização da agência,localização da agência,inteiro,
+frequencia,frequência,frequência da conta,texto,"TAXA MENSAL" significa emissão mensal; "TAXA POR SEMANA" significa emissão semanal; "TAXA APOS O ROTEIRO" significa emissão após transação
+data,data,data de criação da conta,data,no formato AAMMDD
