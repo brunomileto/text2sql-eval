@@ -100,6 +100,7 @@ def run(config: AppConfig) -> str:
                         track_artifacts=track_artifacts,
                         raw_response=llm_response.content,
                         normalized_sql=sql,
+                        reference_sql=question.reference_sql,
                         input_tokens=llm_response.input_tokens,
                         output_tokens=llm_response.output_tokens,
                         latency_ms=llm_response.latency_ms,

@@ -48,7 +48,7 @@ def test_openai_provider_generate_returns_content_usage_and_latency(monkeypatch)
     assert captured["api_key"] == "test-openai-key"
     assert captured["model"] == "gpt-4o"
     assert captured["temperature"] == 0.0
-    assert captured["max_tokens"] == 256
+    assert captured["max_completion_tokens"] == 256
     assert captured["messages"] == [{"role": "user", "content": "Count users"}]
     assert response.content == "SELECT 1"
     assert response.input_tokens == 11

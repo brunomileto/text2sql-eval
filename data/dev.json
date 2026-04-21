@@ -1,17 +1,27 @@
 [
   {
-    "question_id": "q001_facil",
-    "question": "Quantos registros de cartao do tipo gold foram publicados?",
-    "sql": "SELECT COUNT(*) FROM cartao WHERE tipo = 'gold'"
+    "question_id": "89",
+    "question": "Quantas contas que escolheram fazer emissão após transação, estão na região da Bohemia Oriental?",
+    "sql": "SELECT COUNT(T2.id_da_conta) FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_do_distrito = T2.id_do_distrito WHERE T1.A3 = 'east Bohemia' AND T2.frequencia = 'TAXA MENSAL';"
   },
   {
-    "question_id": "q002_media",
-    "question": "Para cada id_do_distrito, qual e a media dos pagamentos dos emprestimos com status 'A'?",
-    "sql": "SELECT c.id_do_distrito, ROUND(AVG(e.pagamentos), 2) AS media_pagamentos FROM emprestimo AS e JOIN conta AS c ON c.id_da_conta = e.id_da_conta WHERE e.status = 'A' GROUP BY c.id_do_distrito ORDER BY media_pagamentos DESC"
+    "question_id": "92",
+    "question": "Informe o número de distritos em que o salário médio feminino é maior que 6000, mas menor que 10000.",
+    "sql": "SELECT COUNT(DISTINCT T2.id_do_distrito) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_do_distrito = T2.id_do_distrito WHERE T1.genero = 'F' AND T2.A11 BETWEEN 6000 AND 10000"
   },
   {
-    "question_id": "q003_dificil",
-    "question": "Quais sao os tres id_do_distrito com maior percentual de emprestimos com status 'D' entre os emprestimos com status 'C' e 'D'? Retorne id_do_distrito e percentual_status_d.",
-    "sql": "SELECT c.id_do_distrito, ROUND(100.0 * SUM(CASE WHEN e.status = 'D' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2) AS percentual_status_d FROM emprestimo AS e JOIN conta AS c ON c.id_da_conta = e.id_da_conta WHERE e.status IN ('C', 'D') GROUP BY c.id_do_distrito HAVING COUNT(*) > 0 ORDER BY percentual_status_d DESC, c.id_do_distrito ASC LIMIT 3"
+    "question_id": "112",
+    "question": "Para a cliente mulher nascida em 1976/1/29, em qual distrito ela abriu sua conta?",
+    "sql": "SELECT T1.A2 FROM distrito AS T1 INNER JOIN cliente AS T2 ON T1.id_do_distrito = T2.id_do_distrito WHERE T2.data_de_nascimento = '1976-01-29' AND T2.genero = 'F'"
+  },
+  {
+    "question_id": "159",
+    "question": "Liste todas as transações de saque em dinheiro feitas pelo cliente com id 3356.",
+    "sql": "SELECT T4.identificacao_trans FROM cliente AS T1 INNER JOIN disposicao AS T2 ON T1.id_do_cliente = T2.id_do_cliente INNER JOIN conta AS T3 ON T2.id_da_conta = T3.id_da_conta INNER JOIN transacao AS T4 ON T3.id_da_conta = T4.id_da_conta WHERE T1.id_do_cliente = 3356 AND T4.operacao = 'ESCOLHER'"
+  },
+  {
+    "question_id": "149",
+    "question": "Liste os tipos de conta que não são elegíveis para empréstimos, e cuja renda média dos moradores do distrito onde a conta está localizada excede $8000, mas não passa de $9000.",
+    "sql": "SELECT T3.tipo FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_do_distrito = T2.id_do_distrito INNER JOIN disposicao AS T3 ON T2.id_da_conta = T3.id_da_conta WHERE T3.tipo != 'PROPRIETARIO' AND T1.A11 BETWEEN 8000 AND 9000 "
   }
 ]

@@ -9,22 +9,25 @@ from ..config import LLMModelConfig
 from .base import LLMProvider, LLMResponse
 
 
-class OpenAIProvider(LLMProvider):
+class MaritacaProvider(LLMProvider):
     def __init__(self, model_config: LLMModelConfig):
         self._model_config = model_config
 
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("MARITACA_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
+            raise ValueError("MARITACA_API_KEY environment variable is required")
 
-        self._client = OpenAI(api_key=api_key)
+        base_url = os.getenv("MARITACA_BASE_URL", "https://chat.maritaca.ai/api")
+
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
 
     def generate(self, prompt: str) -> LLMResponse:
+        print("heeeeeeeere")
         started = time.perf_counter()
         response = self._client.chat.completions.create(
             model=self._model_config.model,
             temperature=self._model_config.temperature,
-            max_completion_tokens=self._model_config.max_tokens,
+            max_tokens=self._model_config.max_tokens,
             messages=[
                 {
                     "role": "user",

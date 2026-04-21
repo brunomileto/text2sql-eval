@@ -48,6 +48,7 @@ class PipelineRecord:
     track_artifacts: dict[str, Any] = field(default_factory=dict)
     raw_response: str = ""
     normalized_sql: str = ""
+    reference_sql: str = ""
     input_tokens: int = 0
     output_tokens: int = 0
     latency_ms: int = 0

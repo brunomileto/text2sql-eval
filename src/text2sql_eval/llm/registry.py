@@ -4,11 +4,13 @@ from ..config import LLMModelConfig
 from .anthropic_provider import AnthropicProvider
 from .base import LLMProvider
 from .fake_provider import FakeProvider
+from .maritaca_provider import MaritacaProvider
 from .openai_provider import OpenAIProvider
 
 LLM_REGISTRY: dict[str, type[LLMProvider]] = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
+    "maritaca": MaritacaProvider,
     "fake": FakeProvider,
 }
 

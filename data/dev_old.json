@@ -1,0 +1,17 @@
+[
+  {
+    "question_id": "q001_facil",
+    "question": "Quantos registros de cartao do tipo gold foram publicados?",
+    "sql": "SELECT COUNT(*) FROM cartao WHERE tipo = 'gold'"
+  },
+  {
+    "question_id": "q002_media",
+    "question": "Para cada id_do_distrito, qual e a media dos pagamentos dos emprestimos com status 'A'?",
+    "sql": "SELECT c.id_do_distrito, ROUND(AVG(e.pagamentos), 2) AS media_pagamentos FROM emprestimo AS e JOIN conta AS c ON c.id_da_conta = e.id_da_conta WHERE e.status = 'A' GROUP BY c.id_do_distrito ORDER BY media_pagamentos DESC"
+  },
+  {
+    "question_id": "q003_dificil",
+    "question": "Quais sao os tres id_do_distrito com maior percentual de emprestimos com status 'D' entre os emprestimos com status 'C' e 'D'? Retorne id_do_distrito e percentual_status_d.",
+    "sql": "SELECT c.id_do_distrito, ROUND(100.0 * SUM(CASE WHEN e.status = 'D' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2) AS percentual_status_d FROM emprestimo AS e JOIN conta AS c ON c.id_da_conta = e.id_da_conta WHERE e.status IN ('C', 'D') GROUP BY c.id_do_distrito HAVING COUNT(*) > 0 ORDER BY percentual_status_d DESC, c.id_do_distrito ASC LIMIT 3"
+  }
+]

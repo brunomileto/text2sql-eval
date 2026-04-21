@@ -1,17 +1,21 @@
 models:
-  - provider: fake
-    model: local-test
-    temperature: 0.0
-    max_tokens: 32
   - provider: openai
     model: gpt-4o
     temperature: 0.0
     max_tokens: 1024
-  - provider: anthropic
-    model: claude-3-5-sonnet-20241022
+  - provider: openai
+    model: gpt-5.4-mini
     temperature: 0.0
     max_tokens: 1024
-
+  - provider: openai
+    model: gpt-5.4
+    temperature: 0.0
+    max_tokens: 1024
+  - provider: maritaca
+    model: sabia-4 
+    temperature: 0.0
+    max_tokens: 1024
+    
 rag:
   backend: chroma
   top_k: 5
