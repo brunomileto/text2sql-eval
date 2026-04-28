@@ -65,6 +65,24 @@ def test_result_rows_are_sorted(tmp_path):
     assert result.rows == [(1,), (2,), (3,)]
 
 
+def test_result_rows_with_nulls_are_sorted(tmp_path):
+    db_path = _build_test_db(tmp_path)
+
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("ALTER TABLE employees ADD COLUMN score REAL")
+        connection.execute("UPDATE employees SET score = 10.0 WHERE id = 1")
+        connection.execute("UPDATE employees SET score = NULL WHERE id = 2")
+        connection.execute("UPDATE employees SET score = 5.0 WHERE id = 3")
+        connection.commit()
+
+    result = execute_sql("SELECT score FROM employees", db_path)
+
+    assert result.success is True
+    assert result.error_message is None
+    assert result.error_type is None
+    assert result.rows == [(5.0,), (10.0,), (None,)]
+
+
 def test_read_only_connection_blocks_writes(tmp_path):
     db_path = _build_test_db(tmp_path)
 

@@ -22,7 +22,6 @@ class MaritacaProvider(LLMProvider):
         self._client = OpenAI(api_key=api_key, base_url=base_url)
 
     def generate(self, prompt: str) -> LLMResponse:
-        print("heeeeeeeere")
         started = time.perf_counter()
         response = self._client.chat.completions.create(
             model=self._model_config.model,

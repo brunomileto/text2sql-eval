@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -11,6 +12,22 @@ class ExecutionResult:
     rows: list[tuple] | None
     error_message: str | None
     error_type: str | None
+
+
+def _cell_sort_key(value: Any) -> tuple:
+    if value is None:
+        return (1, "", "")
+    if isinstance(value, int | float) and not isinstance(value, bool):
+        return (0, "number", value)
+    if isinstance(value, str):
+        return (0, "str", value)
+    if isinstance(value, bytes):
+        return (0, "bytes", value)
+    return (0, type(value).__name__, repr(value))
+
+
+def _row_sort_key(row: tuple) -> tuple:
+    return tuple(_cell_sort_key(value) for value in row)
 
 
 def execute_sql(sql: str, db_path: Path) -> ExecutionResult:
@@ -27,7 +44,10 @@ def execute_sql(sql: str, db_path: Path) -> ExecutionResult:
             connection.execute("PRAGMA busy_timeout = 30000")
             cursor = connection.execute(sql)
             fetched_rows = cursor.fetchall()
-            normalized_rows = sorted(tuple(row) for row in fetched_rows)
+            normalized_rows = sorted(
+                (tuple(row) for row in fetched_rows),
+                key=_row_sort_key,
+            )
             return ExecutionResult(
                 success=True,
                 rows=normalized_rows,
