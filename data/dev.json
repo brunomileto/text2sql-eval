@@ -1,7 +1,162 @@
 [
   {
+    "question_id": "89",
+    "question": "Quantas contas que escolhem taxa por operação estão localizadas na região de east Bohemia?",
+    "sql": "SELECT COUNT(T2.id_conta) FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.A3 = 'east Bohemia' AND T2.frequencia = 'TAXA POR OPERACAO'"
+  },
+  {
+    "question_id": "92",
+    "question": "Liste o número de distritos onde o salário médio feminino é maior que 6000 mas menor que 10000?",
+    "sql": "SELECT COUNT(DISTINCT T2.id_distrito) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.genero = 'F' AND T2.A11 BETWEEN 6000 AND 10000"
+  },
+  {
+    "question_id": "93",
+    "question": "Quantos clientes do sexo masculino morando em north Bohemia possuem um salário médio maior que 8000?",
+    "sql": "SELECT COUNT(T1.id_cliente) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.genero = 'M' AND T2.A3 = 'north Bohemia' AND T2.A11 > 8000"
+  },
+  {
+    "question_id": "94",
+    "question": "Liste os números das contas das clientes mulheres mais velhas e com o menor salário médio, calcule a diferença entre esse menor salário médio e o maior salário médio?",
+    "sql": "SELECT T1.id_conta , ( SELECT MAX(A11) - MIN(A11) FROM distrito ) FROM conta AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito INNER JOIN disp AS T3 ON T1.id_conta = T3.id_conta INNER JOIN cliente AS T4 ON T3.id_cliente = T4.id_cliente WHERE T2.id_distrito = ( SELECT id_distrito FROM cliente WHERE genero = 'F' ORDER BY data_nascimento ASC LIMIT 1 ) ORDER BY T2.A11 DESC LIMIT 1"
+  },
+  {
+    "question_id": "95",
+    "question": "Liste os números de conta dos clientes mais jovens e que possuem o maior salário médio?",
+    "sql": "SELECT T1.id_conta FROM conta AS T1 INNER JOIN disp AS T2 ON T1.id_conta = T2.id_conta INNER JOIN cliente AS T3 ON T2.id_cliente = T3.id_cliente INNER JOIN distrito AS T4 on T4.id_distrito = T1.id_distrito WHERE T2.id_cliente = ( SELECT id_cliente FROM cliente ORDER BY data_nascimento DESC LIMIT 1) GROUP BY T4.A11, T1.id_conta"
+  },
+  {
+    "question_id": "98",
+    "question": "Entre as contas que tiveram empréstimo aprovado em 1997, liste as contas que possuem o menor valor aprovado e escolhem extrato de taxa semanal.",
+    "sql": "SELECT T2.id_conta FROM emprestimo AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta WHERE STRFTIME('%Y', T1.data) = '1997' AND T2.frequencia = 'TAXA SEMANAL' ORDER BY T1.valor LIMIT 1"
+  },
+  {
+    "question_id": "99",
+    "question": "Entre as contas com duração de empréstimo superior a 12 meses, liste as contas que possuem o maior valor aprovado e cuja data de abertura da conta ocorreu em 1993.",
+    "sql": "SELECT T1.id_conta FROM emprestimo AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta WHERE STRFTIME('%Y', T2.data) = '1993' AND T1.duracao > 12 ORDER BY T1.valor DESC LIMIT 1"
+  },
+  {
+    "question_id": "100",
+    "question": "Entre as contas abertas, quantas clientes mulheres nasceram antes de 1950 e ficaram em Sokolov?",
+    "sql": "SELECT COUNT(T2.id_cliente) FROM distrito AS T1 INNER JOIN cliente AS T2 ON T1.id_distrito = T2.id_distrito WHERE T2.genero = 'F' AND STRFTIME('%Y', T2.data_nascimento) < '1950' AND T1.A2 = 'Sokolov'"
+  },
+  {
+    "question_id": "112",
+    "question": "Para a cliente mulher que nasceu em 1976/1/29, em qual distrito ela abriu sua conta?",
+    "sql": "SELECT T1.A2 FROM distrito AS T1 INNER JOIN cliente AS T2 ON T1.id_distrito = T2.id_distrito WHERE T2.data_nascimento = '1976-01-29' AND T2.genero = 'F'"
+  },
+  {
+    "question_id": "115",
+    "question": "Para a agência localizada em south Bohemia com o maior número de habitantes, qual é a porcentagem de clientes homens?",
+    "sql": "SELECT CAST(SUM(T1.genero = 'M') AS REAL) * 100 / COUNT(T1.id_cliente) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T2.A3 = 'south Bohemia' GROUP BY T2.A4 ORDER BY T2.A4 DESC LIMIT 1"
+  },
+  {
+    "question_id": "116",
+    "question": "Para o cliente cujo empréstimo foi aprovado primeiro em 1993/7/5, qual foi a taxa de aumento do saldo da conta de 1993/3/22 a 1998/12/27?",
+    "sql": "SELECT CAST((SUM(IIF(T3.data = '1998-12-27', T3.saldo, 0)) - SUM(IIF(T3.data = '1993-03-22', T3.saldo, 0))) AS REAL) * 100 / SUM(IIF(T3.data = '1993-03-22', T3.saldo, 0)) FROM emprestimo AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta INNER JOIN trans AS T3 ON T3.id_conta = T2.id_conta WHERE T1.data = '1993-07-05'"
+  },
+  {
+    "question_id": "117",
+    "question": "Qual é a porcentagem do valor de empréstimo que foi totalmente pago sem problemas?",
+    "sql": "SELECT (CAST(SUM(CASE WHEN status = 'A' THEN valor ELSE 0 END) AS REAL) * 100) / SUM(valor) FROM emprestimo"
+  },
+  {
+    "question_id": "118",
+    "question": "Para valores de empréstimo abaixo de USD100,000, qual é a porcentagem de contas que ainda estão ativas e sem problemas.",
+    "sql": "SELECT CAST(SUM(status = 'C') AS REAL) * 100 / COUNT(id_conta) FROM emprestimo WHERE valor < 100000"
+  },
+  {
     "question_id": "125",
     "question": "Para contratos de empréstimos que ainda estão ativos onde os clientes estão em dívida, liste o distrito e apresente a taxa percentual de aumento do desemprego entre os anos de 1995 e 1996.",
     "sql": "SELECT CAST((T3.A13 - T3.A12) AS REAL) * 100 / T3.A12 FROM emprestimo AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta INNER JOIN distrito AS T3 ON T2.id_distrito = T3.id_distrito WHERE T1.status = 'D'"
+  },
+  {
+    "question_id": "128",
+    "question": "Liste os nove principais distritos, em ordem decrescente, do maior para o menor número de titulares de contas mulheres.",
+    "sql": "SELECT T2.A2, COUNT(T1.id_cliente) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.genero = 'F' GROUP BY T2.id_distrito, T2.A2 ORDER BY COUNT(T1.id_cliente) DESC LIMIT 9"
+  },
+  {
+    "question_id": "136",
+    "question": "Entre 1/1/1995 e 31/12/1997, quantos empréstimos no valor de pelo menos 250.000 por conta que escolheram taxa mensal de extrato foram aprovados?",
+    "sql": "SELECT COUNT(T1.id_conta) FROM conta AS T1 INNER JOIN emprestimo AS T2 ON T1.id_conta = T2.id_conta WHERE T2.data BETWEEN '1995-01-01' AND '1997-12-31' AND T1.frequencia = 'TAXA MENSAL' AND T2.valor >= 250000"
+  },
+  {
+    "question_id": "129",
+    "question": "Quais são os dez maiores saques (sem cartão de crédito) por nomes de distritos para o mês de janeiro de 1996?",
+    "sql": "SELECT DISTINCT T1.A2 FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_distrito = T2.id_distrito INNER JOIN trans AS T3 ON T2.id_conta = T3.id_conta WHERE T3.tipo = 'DEBITO' AND T3.data LIKE '1996-01%' ORDER BY T1.A2 ASC LIMIT 10"
+  },
+  {
+    "question_id": "137",
+    "question": "Quantas contas possuem contratos ativos na agência localizada no distrito 1?",
+    "sql": "SELECT COUNT(T1.id_conta) FROM conta AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito INNER JOIN emprestimo AS T3 ON T1.id_conta = T3.id_conta WHERE T1.id_distrito = 1 AND (T3.status = 'C' OR T3.status = 'D')"
+  },
+  {
+    "question_id": "138",
+    "question": "Na agência onde ocorreu o segundo maior número de crimes cometidos em 1995, quantos clientes do sexo masculino existem?",
+    "sql": "SELECT COUNT(T1.id_cliente) FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.genero = 'M' AND T2.A15 = (SELECT T3.A15 FROM distrito AS T3 ORDER BY T3.A15 DESC LIMIT 1, 1)"
+  },
+  {
+    "question_id": "145",
+    "question": "Quais são os números das contas dos titulares que tiveram transações de saque no cartão com valor inferior à média em 1998?",
+    "sql": "SELECT T1.id_conta FROM trans AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta WHERE STRFTIME('%Y', T1.data) = '1998' AND T1.operacao = 'SAQUE NO CARTAO' AND T1.valor < (SELECT AVG(valor) FROM trans WHERE STRFTIME('%Y', data) = '1998')"
+  },
+  {
+    "question_id": "149",
+    "question": "Liste os tipos de conta que não são elegíveis a empréstimos e que possuam a renda média dos residentes no distrito maior que $8000, mas não superior a $9000.",
+    "sql": "SELECT T3.tipo FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_distrito = T2.id_distrito INNER JOIN disp AS T3 ON T2.id_conta = T3.id_conta WHERE T3.tipo != 'TITULAR' AND T1.A11 BETWEEN 8000 AND 9000"
+  },
+  {
+    "question_id": "152",
+    "question": "Qual é o número médio de crimes cometidos em 1995 em regiões cujo número excedeu 4000 e a região tem contas abertas a partir do ano de 1997?",
+    "sql": "SELECT AVG(T1.A15) FROM distrito AS T1 INNER JOIN conta AS T2 ON T1.id_distrito = T2.id_distrito WHERE STRFTIME('%Y', T2.data) >= '1997' AND T1.A15 > 4000"
+  },
+  {
+    "question_id": "159",
+    "question": "Liste todas as transações de saques em dinheiro feitas pelo cliente de id 3356.",
+    "sql": "SELECT T4.id_transacao FROM cliente AS T1 INNER JOIN disp AS T2 ON T1.id_cliente = T2.id_cliente INNER JOIN conta AS T3 ON T2.id_conta = T3.id_conta INNER JOIN trans AS T4 ON T3.id_conta = T4.id_conta WHERE T1.id_cliente = 3356 AND T4.operacao = 'SAQUE EM DINHEIRO'"
+  },
+  {
+    "question_id": "168",
+    "question": "Qual a porcentagem de clientes que abriram suas contas no distrito com salário médio acima de 10000 e que são mulheres?",
+    "sql": "SELECT CAST(SUM(T2.genero = 'F') AS REAL) * 100 / COUNT(T2.id_cliente) FROM distrito AS T1 INNER JOIN cliente AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.A11 > 10000"
+  },
+  {
+    "question_id": "169",
+    "question": "Qual foi a taxa de crescimento do valor total de empréstimos em todas as contas de um cliente homem entre 1996 e 1997?",
+    "sql": "SELECT CAST((SUM(CASE WHEN STRFTIME('%Y', T1.data) = '1997' THEN T1.valor ELSE 0 END) - SUM(CASE WHEN STRFTIME('%Y', T1.data) = '1996' THEN T1.valor ELSE 0 END)) AS REAL) * 100 / SUM(CASE WHEN STRFTIME('%Y', T1.data) = '1996' THEN T1.valor ELSE 0 END) FROM emprestimo AS T1 INNER JOIN conta AS T2 ON T1.id_conta = T2.id_conta INNER JOIN disp AS T3 ON T3.id_conta = T2.id_conta INNER JOIN cliente AS T4 ON T4.id_cliente = T3.id_cliente WHERE T4.genero = 'M' AND T3.tipo = 'TITULAR'"
+  },
+  {
+    "question_id": "173",
+    "question": "Com que frequência a conta número 3 exige a emissão de extrato de conta? Qual foi a finalidade do débito de 3539 no total?",
+    "sql": "SELECT T1.frequencia, T2.simbolo_k FROM conta AS T1 INNER JOIN (SELECT id_conta, simbolo_k, SUM(valor) AS total_valor FROM ordem GROUP BY id_conta, simbolo_k) AS T2 ON T1.id_conta = T2.id_conta WHERE T1.id_conta = 3 AND T2.total_valor = 3539"
+  },
+  {
+    "question_id": "186",
+    "question": "Qual é a porcentagem de clientes homens que solicitam a emissão de extratos semanais?",
+    "sql": "SELECT CAST(SUM(T1.genero = 'M') AS REAL) * 100 / COUNT(T1.id_cliente) FROM cliente AS T1 INNER JOIN distrito AS T3 ON T1.id_distrito = T3.id_distrito INNER JOIN conta AS T2 ON T2.id_distrito = T3.id_distrito INNER JOIN disp as T4 on T1.id_cliente = T4.id_cliente AND T2.id_conta = T4.id_conta WHERE T2.frequencia = 'TAXA SEMANAL'"
+  },
+  {
+    "question_id": "189",
+    "question": "Diga os números das contas das clientes mulheres mais velhas e que têm o menor salário médio?",
+    "sql": "SELECT T3.id_conta FROM cliente AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito INNER JOIN conta AS T3 ON T2.id_distrito = T3.id_distrito INNER JOIN disp AS T4 ON T1.id_cliente = T4.id_cliente AND T4.id_conta = T3.id_conta WHERE T1.genero = 'F' ORDER BY T1.data_nascimento ASC, T2.A11 ASC LIMIT 1"
+  },
+  {
+    "question_id": "192",
+    "question": "Qual é o valor médio de empréstimos em contratos que ainda estão ativos e que emitem extrato após cada transação?",
+    "sql": "SELECT AVG(T2.valor) FROM conta AS T1 INNER JOIN emprestimo AS T2 ON T1.id_conta = T2.id_conta WHERE T2.status IN ('C', 'D') AND T1.frequencia = 'TAXA POR OPERACAO'"
+  },
+  {
+    "question_id": "194",
+    "question": "Forneça os IDs e a idade do cliente com cartão de crédito de nível mais alto que seja elegível para empréstimos.",
+    "sql": "SELECT T1.id_cliente, STRFTIME('%Y', CURRENT_TIMESTAMP) - STRFTIME('%Y', T3.data_nascimento) FROM disp AS T1 INNER JOIN cartao AS T2 ON T2.id_disposicao = T1.id_disposicao INNER JOIN cliente AS T3 ON T1.id_cliente = T3.id_cliente WHERE T2.tipo = 'gold' AND T1.tipo = 'TITULAR'"
+  },
+  {
+    "question_id": "119",
+    "question": "Para as contas abertas em 1993 com emissão de extrato após a transação, liste o ID da conta, o nome do distrito e a região do distrito.",
+    "sql": "SELECT T1.id_conta, T2.A2, T2.A3 FROM conta AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T1.frequencia = 'TAXA POR OPERACAO' AND STRFTIME('%Y', T1.data)= '1993'"
+  },
+  {
+    "question_id": "120",
+    "question": "De 1995 a 2000, quem são os donos de contas da região 'east Bohemia'. Indique o ID da conta e a frequência de emissão de extratos.",
+    "sql": "SELECT T1.id_conta, T1.frequencia FROM conta AS T1 INNER JOIN distrito AS T2 ON T1.id_distrito = T2.id_distrito WHERE T2.A3 = 'east Bohemia' AND STRFTIME('%Y', T1.data) BETWEEN '1995' AND '2000'"
   }
 ]
