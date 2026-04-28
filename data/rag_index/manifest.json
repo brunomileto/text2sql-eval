@@ -1,0 +1,32 @@
+{
+  "backend": "chroma",
+  "embedding_model": "text-embedding-3-small",
+  "source_count": 6,
+  "chunk_count": 30,
+  "sources": [
+    {
+      "source_path": "docs/rag/README.md",
+      "char_count": 848
+    },
+    {
+      "source_path": "docs/rag/analyst-onboarding.md",
+      "char_count": 4663
+    },
+    {
+      "source_path": "docs/rag/customer-account-relationships.md",
+      "char_count": 4418
+    },
+    {
+      "source_path": "docs/rag/financial_schema.md",
+      "char_count": 8331
+    },
+    {
+      "source_path": "docs/rag/lending-and-regional-reporting.md",
+      "char_count": 4117
+    },
+    {
+      "source_path": "docs/rag/payments-and-activity-notes.md",
+      "char_count": 4565
+    }
+  ]
+}

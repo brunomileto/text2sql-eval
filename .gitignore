@@ -5,8 +5,9 @@ __pycache__/
 .pytest_cache/
 .venv/
 results/*/
+!results/20260421-192726/
 data/*.sqlite
-data/rag_index/
+!data/database.sqlite
 dist/
 *.egg-info/
 .ruff_cache/

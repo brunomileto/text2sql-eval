@@ -1,0 +1,492 @@
+{
+  "tables": [
+    {
+      "name": "cartao",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_cartao",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_disposicao",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "disp.id_disposicao"
+        },
+        {
+          "name": "tipo",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "emitido",
+          "data_type": "DATE",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "cliente",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_cliente",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "genero",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "data_nascimento",
+          "data_type": "DATE",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_distrito",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "distrito.id_distrito"
+        }
+      ]
+    },
+    {
+      "name": "conta",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_distrito",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "distrito.id_distrito"
+        },
+        {
+          "name": "frequencia",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "data",
+          "data_type": "DATE",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "disp",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_disposicao",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_cliente",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "cliente.id_cliente"
+        },
+        {
+          "name": "id_conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "conta.id_conta"
+        },
+        {
+          "name": "tipo",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "distrito",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_distrito",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A2",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A3",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A4",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A5",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A6",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A7",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A8",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A9",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A10",
+          "data_type": "REAL",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A11",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A12",
+          "data_type": "REAL",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A13",
+          "data_type": "REAL",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A14",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A15",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "A16",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "emprestimo",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_emprestimo",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "conta.id_conta"
+        },
+        {
+          "name": "data",
+          "data_type": "DATE",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "valor",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "duracao",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "parcelas",
+          "data_type": "REAL",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "status",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "ordem",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_ordem",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "conta.id_conta"
+        },
+        {
+          "name": "banco_para",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "conta_para",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "valor",
+          "data_type": "REAL",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "simbolo_k",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    },
+    {
+      "name": "trans",
+      "description": "",
+      "columns": [
+        {
+          "name": "id_transacao",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": true,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "id_conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": true,
+          "references": "conta.id_conta"
+        },
+        {
+          "name": "data",
+          "data_type": "DATE",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "tipo",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "operacao",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "valor",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "saldo",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "simbolo_k",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "banco",
+          "data_type": "TEXT",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        },
+        {
+          "name": "conta",
+          "data_type": "INTEGER",
+          "description": "",
+          "is_primary_key": false,
+          "is_foreign_key": false,
+          "references": null
+        }
+      ]
+    }
+  ]
+}
